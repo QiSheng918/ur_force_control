@@ -1,0 +1,9 @@
+<launch>
+  <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find ur5_table)/urdf/ur5table2.xacro'" />
+  <include file="$(find ur_modern_driver)/launch/ur5_bringup2.launch">
+    <arg name="robot_ip" value="192.168.1.100"/>
+  </include>
+
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find ur5_table)/urdf.rviz"/>
+
+</launch>

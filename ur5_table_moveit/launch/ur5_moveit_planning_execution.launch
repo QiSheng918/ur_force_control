@@ -1,0 +1,40 @@
+<launch>
+
+  <!--Upload joint names to parameter server-->
+  <rosparam command="load" file="$(find ur5_table_moveit)/config/joint_names.yaml"/>
+
+
+  <arg name="sim" default="false" />
+  <arg name="robot_ip" />
+
+  <!--Upload urdf and srdf model of the robot to parameter server.
+      Meanwhile, load joint limits and kinematics.yaml file to parameter server-->
+  <include file="$(find ur5_table_moveit)/launch/planning_context.launch" >
+   <arg name="load_robot_description" value="true" />
+  </include>
+
+
+  <group if="$(arg sim)">
+    <include file="$(find industrial_robot_simulator)/launch/robot_interface_simulator.launch" />
+  </group>
+
+  <!--This is the driver of ur robot. It can communicate with the real robot.
+      Start the ur_driver node, it publishs joint values.-->
+  <group unless="$(arg sim)">
+    <include file="$(find ur_modern_driver)/launch/ur5_bringup2.launch">
+        <arg name="robot_ip" value="192.168.1.102"/>
+    </include>
+  </group>
+
+
+  <!--It is the most important file. For more detail, please see move_group.launch-->
+  <include file="$(find ur5_table_moveit)/launch/move_group.launch">
+    <arg name="publish_monitored_planning_scene" value="true" />
+  </include>
+  
+  <!--Visualize the robot model in Rviz-->
+  <include file="$(find ur5_table_moveit)/launch/moveit_rviz.launch">
+    <arg name="config" value="true"/>
+  </include>
+
+</launch>

@@ -1,0 +1,23 @@
+{
+    "configurations": [
+        {
+            "browse": {
+                "databaseFilename": "",
+                "limitSymbolsToIncludedHeaders": true
+            },
+            "includePath": [
+                "/opt/ros/kinetic/include/**",
+                "/home/seven/gravity_ws/src/gravity_con/include/**",
+                "/home/seven/gravity_ws/src/etherdaq_ros/include/**",
+                "/home/seven/gravity_ws/src/ur_modern_driver/include/**",
+                "/usr/include/**"
+            ],
+            "name": "ROS",
+            "intelliSenseMode": "msvc-x64",
+            "compilerPath": "D:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.26.28801/bin/Hostx64/x64/cl.exe",
+            "cStandard": "c11",
+            "cppStandard": "c++17"
+        }
+    ],
+    "version": 4
+}

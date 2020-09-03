@@ -1,0 +1,66 @@
+<?xml version="1.0" ?>
+<robot name="ur5table" xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:include filename="$(find ur_description)/urdf/ur5.urdf.xacro" />
+
+  <material name="blue"><!--blue-->
+    <color rgba="0.0 0.0 0.8 1.0"/>
+  </material>
+
+  <material name="green"><!--green-->
+    <color rgba="0.0 0.8 0.0 1.0"/>
+  </material>
+
+  <material name="grey"><!--grey-->
+    <color rgba="0.2 0.2 0.2 1.0"/>
+  </material>
+
+  <material name="orange"><!--orange-->
+    <color rgba="${255/255} ${108/255} ${10/255} 1.0"/>
+  </material>
+
+  <material name="brown"><!--brown-->
+    <color rgba="${222/255} ${207/255} ${195/255} 1.0"/>
+  </material>
+
+  <link name="world"/>
+
+
+  <link name="table">
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://ur5_table/meshes/deskasagv.STL" />
+      </geometry>
+      <material
+        name="orange">
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://ur5_table/meshes/deskasagv.STL" />
+      </geometry>
+    </collision>
+  </link>
+
+
+  <xacro:ur5_robot prefix="" joint_limited="true"/>
+
+  <joint name="world_to_table" type="fixed">
+    <parent link="world"/>
+    <child link="table"/>
+    <origin xyz="0.14 0 0" rpy="0 0 0"/>
+  </joint>
+  
+  <joint name="world_to_robot" type="fixed">
+    <parent link="world"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 0" rpy="0 0 3.1415926535897932346"/>
+  </joint>
+</robot>

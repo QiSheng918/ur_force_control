@@ -1,0 +1,4 @@
+<launch>
+   <node pkg="gravity_con" type="gravity_compensate" name="test" output="screen"/>
+   <rosparam file="$(find gravity_con)/config/param.yaml" command="load"/>
+</launch>
