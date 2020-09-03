@@ -35,6 +35,13 @@ add_executable(mean_filter_node src/mean_filter.cpp)
 target_link_libraries(mean_filter_node
   ${catkin_LIBRARIES}
 )
+
+add_executable(compensate_filter_node src/compensate_filter.cpp)
+target_link_libraries(compensate_filter_node
+  ${catkin_LIBRARIES}
+)
+
+
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use

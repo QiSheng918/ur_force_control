@@ -24,7 +24,13 @@ void WrenchsubCallback(const geometry_msgs::WrenchStamped& msg)
             wrench_sum[i]+=wrench[i][j];
         }
     }
-
+    
+    for(int i=0;i<3;i++){
+        if(abs(wrench_sum[i])<1*frequency) wrench_sum[i]=0;
+    }
+    for(int i=3;i<6;i++){
+        if(abs(wrench_sum[i])<0.1*frequency) wrench_sum[i]=0;
+    }
 
     pub_msg.wrench.force.x=wrench_sum[0]/frequency;
     pub_msg.wrench.force.y=wrench_sum[1]/frequency;
@@ -40,7 +46,7 @@ void WrenchsubCallback(const geometry_msgs::WrenchStamped& msg)
 
 int main(int argc, char *argv[])
 {
-    ros::init(argc, argv, "wrench_filter");
+    ros::init(argc, argv, "compensate_filter");
     ros::NodeHandle nh;
 
     flag=0;
@@ -48,8 +54,8 @@ int main(int argc, char *argv[])
     for(int i=0;i<6;i++) wrench.push_back(temp);
     wrench_sum.resize(6);
 
-    wrench_pub = nh.advertise<geometry_msgs::WrenchStamped>("/filtered_wrench", 1000);
-    ros::Subscriber wrench_sub = nh.subscribe("/ethdaq_data", 1000, WrenchsubCallback);
+    wrench_pub = nh.advertise<geometry_msgs::WrenchStamped>("/compensate_filter", 1000);
+    ros::Subscriber wrench_sub = nh.subscribe("/compensate_wrench", 1000, WrenchsubCallback);
 
     ros::Duration(1.0).sleep();
     ros::Rate loop_rate(50);

@@ -1,24 +1,21 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(gravity_compensate)
+project(force_control)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++11)
 
+## Find catkin macros and libraries
+## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
+## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+  geometry_msgs
   roscpp
   sensor_msgs
-  std_msgs
-  geometry_msgs
-  moveit_core
-  moveit_ros_planning
-  moveit_ros_planning_interface
   tf
 )
 
-find_package(Eigen3 REQUIRED)
-
-find_package(yaml-cpp REQUIRED)
-
+## System dependencies are found with CMake's conventions
+# find_package(Boost REQUIRED COMPONENTS system)
 
 
 
@@ -46,10 +43,12 @@ find_package(yaml-cpp REQUIRED)
 ## Generate added messages and services with any dependencies listed here
 # generate_messages(
 #   DEPENDENCIES
-#   sensor_msgs
+#   geometry_msgs#   sensor_msgs
 # )
 
-
+################################################
+## Declare ROS dynamic reconfigure parameters ##
+################################################
 
 ###################################
 ## catkin specific configuration ##
@@ -62,8 +61,8 @@ find_package(yaml-cpp REQUIRED)
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES gravity_compensate
-   CATKIN_DEPENDS roscpp sensor_msgs std_msgs moveit_core moveit_ros_planning_interface
+#  LIBRARIES force_control
+#  CATKIN_DEPENDS geometry_msgs roscpp sensor_msgs tf
 #  DEPENDS system_lib
 )
 
@@ -76,23 +75,11 @@ catkin_package(
 include_directories(
 # include
   ${catkin_INCLUDE_DIRS}
-  ${EIGEN3_INCLUDE_DIRS}
-  ${YAML_CPP_LIBRARIES}
 )
 
-
-add_executable(gravity_identify_node src/gravity_identify.cpp)
-target_link_libraries(gravity_identify_node
-  ${catkin_LIBRARIES}
-  ${YAML_CPP_LIBRARIES}
-)
-
-add_executable(gravity_compensate_node src/gravity_compensate.cpp)
-target_link_libraries(gravity_compensate_node
+add_executable(hybrid_postion_force_node src/hybrid_postion_force.cpp)
+target_link_libraries(hybrid_postion_force_node
   ${catkin_LIBRARIES}
 )
-
-
-
 
 
