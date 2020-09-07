@@ -36,8 +36,13 @@ target_link_libraries(mean_filter_node
   ${catkin_LIBRARIES}
 )
 
-add_executable(compensate_filter_node src/compensate_filter.cpp)
-target_link_libraries(compensate_filter_node
+add_executable(compensate_wrench_tool_filter_node src/compensate_wrench_tool_filter.cpp)
+target_link_libraries(compensate_wrench_tool_filter_node
+  ${catkin_LIBRARIES}
+)
+
+add_executable(compensate_wrench_base_filter_node src/compensate_wrench_base_filter.cpp)
+target_link_libraries(compensate_wrench_base_filter_node
   ${catkin_LIBRARIES}
 )
 

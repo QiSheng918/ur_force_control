@@ -46,7 +46,7 @@ void WrenchsubCallback(const geometry_msgs::WrenchStamped& msg)
 
 int main(int argc, char *argv[])
 {
-    ros::init(argc, argv, "compensate_filter");
+    ros::init(argc, argv, "compensate_wrench_base_filter");
     ros::NodeHandle nh;
 
     flag=0;
@@ -54,8 +54,8 @@ int main(int argc, char *argv[])
     for(int i=0;i<6;i++) wrench.push_back(temp);
     wrench_sum.resize(6);
 
-    wrench_pub = nh.advertise<geometry_msgs::WrenchStamped>("/compensate_filter", 1000);
-    ros::Subscriber wrench_sub = nh.subscribe("/compensate_wrench", 1000, WrenchsubCallback);
+    wrench_pub = nh.advertise<geometry_msgs::WrenchStamped>("/compensate_wrench_base_filter", 1000);
+    ros::Subscriber wrench_sub = nh.subscribe("/compensate_wrench_base", 1000, WrenchsubCallback);
 
     ros::Duration(1.0).sleep();
     ros::Rate loop_rate(50);

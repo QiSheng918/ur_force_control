@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(force_control)
 
-## Compile as C++11, supported in ROS Kinetic and newer
+
 add_compile_options(-std=c++11)
 
 ## Find catkin macros and libraries
@@ -15,8 +15,8 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 ## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
-
+# find_package(Eigen3 REQUIRED)
+find_package(Eigen3 REQUIRED)
 
 
 ## Generate messages in the 'msg' folder
@@ -75,11 +75,26 @@ catkin_package(
 include_directories(
 # include
   ${catkin_INCLUDE_DIRS}
+  ${EIGEN3_INCLUDE_DIRS}
 )
 
 add_executable(hybrid_postion_force_node src/hybrid_postion_force.cpp)
 target_link_libraries(hybrid_postion_force_node
   ${catkin_LIBRARIES}
+  ${Eigen3_LIBRARIES}
 )
+
+add_executable(fixed_point_admittance_control_node src/fixed_point_admittance_control.cpp)
+target_link_libraries(fixed_point_admittance_control_node
+  ${catkin_LIBRARIES}
+  ${Eigen3_LIBRARIES}
+)
+
+add_executable(movement_admittance_control_node src/movement_admittance_control.cpp)
+target_link_libraries(movement_admittance_control_node
+  ${catkin_LIBRARIES}
+  ${EIGEN3_LIBRARIES}
+)
+
 
 

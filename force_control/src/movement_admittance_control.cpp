@@ -1,12 +1,11 @@
 #include "ros/ros.h"
 #include "geometry_msgs/WrenchStamped.h"
 #include "std_msgs/String.h"
-#include "Eigen/Eigen"
-#include "Eigen/Geometry"
-#include "Eigen/Core"
+#include <Eigen/Eigen>
+#include <Eigen/Geometry>
+#include <Eigen/Core>
 #include "cmath"
 #include "std_msgs/Float64.h"
-#include "Eigen/Dense"
 #include "sensor_msgs/JointState.h"
 #include <geometry_msgs/TwistStamped.h>
 #include <tf/transform_listener.h>
@@ -15,10 +14,10 @@ const double m=5;
 const double b=5;
 const double k=20;
 
-class admittance
+class MovementAdmittanceControl
 {
 public:
-    admittance()
+    MovementAdmittanceControl()
     {
         command_vel.resize(6);
         actual_vel.resize(6);
@@ -32,8 +31,8 @@ public:
             actual_pos[i]=0;
         }
 
-        wrench_sub = nh.subscribe("/compensate_wrench_base", 1000, &admittance::WrenchsubCallback,this);
-        tool_velocity_sub=nh.subscribe("/tool_velocity",1000,&admittance::ToolVelocitysubCallback,this);
+        wrench_sub = nh.subscribe("/compensate_wrench_base", 1000, &MovementAdmittanceControl::WrenchsubCallback,this);
+        tool_velocity_sub=nh.subscribe("/tool_velocity",1000,&MovementAdmittanceControl::ToolVelocitysubCallback,this);
         ur_pub = nh.advertise<std_msgs::String>("ur_driver/URScript",1000);
        
         ros::Duration(5.0).sleep();
@@ -83,7 +82,7 @@ private:
 
 
 // 限制发送速度指令大小
-void limitVelocity(std::vector<double> &velocity){
+void MovementAdmittanceControl::limitVelocity(std::vector<double> &velocity){
     for(int i=0;i<velocity.size();i++){
         if(abs(velocity[i])<1e-4) velocity[i]=0;
         else if(velocity[i]>0.5) velocity[i]=0.5;
@@ -93,7 +92,7 @@ void limitVelocity(std::vector<double> &velocity){
 }
 
 //世界坐标系力矩传感器回调函数
-void admittance::WrenchsubCallback(const geometry_msgs::WrenchStamped& msg)
+void MovementAdmittanceControl::WrenchsubCallback(const geometry_msgs::WrenchStamped& msg)
 {
     wrench_base[0] = msg.wrench.force.x;
     wrench_base[1] = msg.wrench.force.y;
@@ -104,7 +103,7 @@ void admittance::WrenchsubCallback(const geometry_msgs::WrenchStamped& msg)
 }
 
 //世界坐标系末端速度回调函数
-void admittance::ToolVelocitysubCallback(const geometry_msgs::TwistStamped& msg)
+void MovementAdmittanceControl::ToolVelocitysubCallback(const geometry_msgs::TwistStamped& msg)
 {
     actual_vel[0]=msg.twist.linear.x;
     actual_vel[1]=msg.twist.linear.y;
@@ -115,7 +114,7 @@ void admittance::ToolVelocitysubCallback(const geometry_msgs::TwistStamped& msg)
 }
 
 //double转string
-std::string admittance::double2string(double input)
+std::string MovementAdmittanceControl::double2string(double input)
 {
     std::string string_temp;
     std::stringstream stream;
@@ -126,7 +125,7 @@ std::string admittance::double2string(double input)
 
 
 //UR机器人运动函数
-void admittance::urMove()
+void MovementAdmittanceControl::urMove()
 {
     std_msgs::String ur_script_msgs;
     double time2move = 0.5;
@@ -147,7 +146,7 @@ void admittance::urMove()
     ur_pub.publish(ur_script_msgs);
 }
 
-Eigen::Matrix3d admittance::quaternion2Rotation(double x,double y,double z,double w){
+Eigen::Matrix3d MovementAdmittanceControl::quaternion2Rotation(double x,double y,double z,double w){
     Eigen::Matrix3d R;
     R(0,0)=1-2*y*y-2*z*z;
     R(0,1)=2*(x*y-z*w);
@@ -161,7 +160,7 @@ Eigen::Matrix3d admittance::quaternion2Rotation(double x,double y,double z,doubl
     return R;
 }
 
-void admittance::getSE3(){
+void MovementAdmittanceControl::getSE3(){
     tf::StampedTransform transform;
     try{
       listener.lookupTransform("base_link", "tool0",  
@@ -186,7 +185,7 @@ int main(int argc, char *argv[])
     ros::init(argc, argv, "admittance_control_of_ur");
     ros::AsyncSpinner spinner(2);
     spinner.start();
-    admittance ad;
+    MovementAdmittanceControl ad;
     ros::waitForShutdown();
     return 0;
 }
