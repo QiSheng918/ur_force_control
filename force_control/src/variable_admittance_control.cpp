@@ -10,11 +10,11 @@
 #include <geometry_msgs/TwistStamped.h>
 #include <tf/transform_listener.h>
 
-const double m=5;
-const double b=5;
+const double m=25;
+const double b=20;
 const double k=20;
 const double desire_fz=10;
-const double sigma=0.1;
+const double sigma=0.05;
 
 class VariableAdmittanceControl
 {
@@ -48,6 +48,7 @@ public:
             last_fz=this->wrench_base[2];
             phi+=sigma*(desire_fz-last_fz)/b;
             command_vel[2]=zdd*delta_t;
+            std::cout<<command_vel[2]<<std::endl;
             this->limitVelocity(command_vel);
             this->urMove();
             ros::spinOnce();
@@ -83,9 +84,9 @@ private:
 // 限制发送速度指令大小
 void VariableAdmittanceControl::limitVelocity(std::vector<double> &velocity){
     for(int i=0;i<velocity.size();i++){
-        if(abs(velocity[i])<1e-4) velocity[i]=0;
-        else if(velocity[i]>0.5) velocity[i]=0.5;
-        else if(velocity[i]<-0.5) velocity[i]=-0.5;
+        // if(abs(velocity[i])<1e-4) velocity[i]=0;
+        if(velocity[i]>0.25) velocity[i]=0.25;
+        else if(velocity[i]<-0.25) velocity[i]=-0.25;
         else ;
     }
 }
