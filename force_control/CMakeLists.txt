@@ -96,5 +96,11 @@ target_link_libraries(movement_admittance_control_node
   ${EIGEN3_LIBRARIES}
 )
 
+add_executable(variable_admittance_control_node src/variable_admittance_control.cpp)
+target_link_libraries(variable_admittance_control_node
+  ${catkin_LIBRARIES}
+  ${EIGEN3_LIBRARIES}
+)
+
 
 
