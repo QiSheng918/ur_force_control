@@ -1,4 +1,4 @@
 <launch>
-    <node pkg="wrench_filter" type="compensate_wrench_tool_node" name="compensate_wrench_tool_node"/>
-	<node pkg="wrench_filter" type="compensate_wrench_base_node" name="compensate_wrench_base_node"/>
+    <node pkg="wrench_filter" type="compensate_wrench_tool_filter_node" name="compensate_wrench_tool_node"/>
+	<node pkg="wrench_filter" type="compensate_wrench_base_filter_node" name="compensate_wrench_base_node"/>
 </launch>
