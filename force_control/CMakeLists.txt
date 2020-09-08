@@ -103,4 +103,11 @@ target_link_libraries(variable_admittance_control_node
 )
 
 
+add_executable(admittance_control_node src/admittance_control.cpp)
+target_link_libraries(admittance_control_node
+  ${catkin_LIBRARIES}
+  ${EIGEN3_LIBRARIES}
+)
+
+
 
