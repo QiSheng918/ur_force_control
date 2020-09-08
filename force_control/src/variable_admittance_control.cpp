@@ -10,11 +10,11 @@
 #include <geometry_msgs/TwistStamped.h>
 #include <tf/transform_listener.h>
 
-const double m=25;
-const double b=20;
-const double k=20;
+const double m=15;
+const double b=1;
+const double k=25;
 const double desire_fz=10;
-const double sigma=0.05;
+const double sigma=0.001;
 
 class VariableAdmittanceControl
 {
@@ -39,16 +39,32 @@ public:
         ur_pub = nh.advertise<std_msgs::String>("ur_driver/URScript",1000);
        
         ros::Duration(5.0).sleep();
-        ros::Rate loop_rate(20);
-        double delta_t=0.05;
+        ros::Rate loop_rate(25);
+        double delta_t=0.04;
+        int loop_flag=0;
+        int direction_flag=0;
         while (ros::ok())
-        {
-
-            double zdd=1/m*((this->wrench_base[2]-desire_fz)-b*(actual_vel[2]-0)-b*phi-sigma*(desire_fz-last_fz));
-            last_fz=this->wrench_base[2];
-            phi+=sigma*(desire_fz-last_fz)/b;
+        {   
+            double actual_fz=this->wrench_base[2];
+            double zdd=1/m*((actual_fz-desire_fz)-b*(actual_vel[2]-0)-b*phi-sigma*(desire_fz-last_fz));
+            last_fz=actual_fz;
+            
+           
+            if(b==0) phi=0;
+            else phi+=sigma*(desire_fz-last_fz)/b;
             command_vel[2]=zdd*delta_t;
+            double error=actual_fz-desire_fz;
+            if(fabs(error)<0.05) loop_flag++;
+            if(loop_flag>20){
+                ROS_INFO_ONCE("STARTED X MOVE");
+                if(direction_flag<60) command_vel[1]=0.05;
+                else if(direction_flag<80) command_vel[1]=0;
+                else if(direction_flag<140) command_vel[1]=-0.05;
+                else command_vel[1]=0;
+                direction_flag=(direction_flag+1)%160;
+            }
             std::cout<<command_vel[2]<<std::endl;
+            // command_vel[2]=2;
             this->limitVelocity(command_vel);
             this->urMove();
             ros::spinOnce();
@@ -83,8 +99,11 @@ private:
 
 // 限制发送速度指令大小
 void VariableAdmittanceControl::limitVelocity(std::vector<double> &velocity){
+    std::cout<<"limit velocity"<<std::endl;
     for(int i=0;i<velocity.size();i++){
-        // if(abs(velocity[i])<1e-4) velocity[i]=0;
+        // std::cout<<velocity[i]
+        // std::cout<<fabs(velocity[i])<<std::endl;
+        if(fabs(velocity[i])<1e-4) velocity[i]=0;
         if(velocity[i]>0.25) velocity[i]=0.25;
         else if(velocity[i]<-0.25) velocity[i]=-0.25;
         else ;
@@ -134,7 +153,7 @@ Eigen::Matrix3d VariableAdmittanceControl::quaternion2Rotation(double x,double y
 void VariableAdmittanceControl::getSE3(){
     tf::StampedTransform transform;
     try{
-      listener.lookupTransform("base_link", "tool0",  
+      listener.lookupTransform("base", "tool0",  
                                ros::Time(0), transform);
     }
     catch (tf::TransformException ex){

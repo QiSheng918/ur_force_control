@@ -4,7 +4,7 @@
 
 ros::Publisher wrench_pub;
 geometry_msgs::WrenchStamped pub_msg;
-const int frequency=11;
+const int frequency=3;
 int flag=0;
 std::vector<std::vector<double> > wrench;
 std::vector<double> wrench_sum;
@@ -26,7 +26,7 @@ void WrenchsubCallback(const geometry_msgs::WrenchStamped& msg)
     }
     
     for(int i=0;i<3;i++){
-        if(abs(wrench_sum[i])<1*frequency) wrench_sum[i]=0;
+        if(abs(wrench_sum[i])<1.5*frequency) wrench_sum[i]=0;
     }
     for(int i=3;i<6;i++){
         if(abs(wrench_sum[i])<0.1*frequency) wrench_sum[i]=0;

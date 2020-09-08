@@ -256,6 +256,8 @@ Visualization Manager:
           Value: false
         tool0:
           Value: false
+        tool0_controller:
+          Value: true
         upper_arm_link:
           Value: false
         world:
@@ -275,7 +277,8 @@ Visualization Manager:
         world:
           base_link:
             base:
-              {}
+              tool0_controller:
+                {}
             shoulder_link:
               upper_arm_link:
                 forearm_link:

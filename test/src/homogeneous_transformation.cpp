@@ -11,6 +11,7 @@
 #include "string.h"
 #include "sensor_msgs/JointState.h"
 #include <moveit/move_group_interface/move_group_interface.h>
+#include <tf/transform_listener.h>
 // #include <moveit/planning_scene_interface/planning_scene_interface.h>
 
 
@@ -39,8 +40,25 @@ public:
         joint_states_sub=nh.subscribe("/joint_states",1000,&GravityCompensate::JointStatesubCallback,this);
         ros::Duration(5).sleep();
         ros::Rate loop_rate(20);
+        tf::StampedTransform transform;
+  
         while(ros::ok()){
-            std::cout<<getSE3()<<std::endl;
+            Eigen::Matrix4d T=getSE3();
+            // std::cout<<getSE3()<<std::endl;
+            try{
+                listener.lookupTransform("base", "tool0",ros::Time(0), transform);
+            }
+            catch (tf::TransformException ex){
+                ROS_ERROR("%s",ex.what());
+                ros::Duration(1.0).sleep();
+            }
+            double x=transform.getRotation().getX();
+            double y=transform.getRotation().getY();
+            double z=transform.getRotation().getZ();
+            double w=transform.getRotation().getW();
+            ROS_INFO_STREAM("THE ERROR OF TF AND POE IS: "<<T(0,3)-transform.getOrigin().getX());
+            // std::cout<<quaternion2Rotation(x,y,z,w)<<std::endl;
+            // std::cout<<transform.getOrigin().getX()<<","<<transform.getOrigin().getY()<<","<<transform.getOrigin().getZ()<<std::endl;
             loop_rate.sleep();
         }
     }
@@ -56,11 +74,14 @@ private:
     Eigen::Matrix<double,6,6> twist;
     Eigen::Matrix<double,4,4> H0;
 
+    tf::TransformListener listener;
+
 
   
     void JointStatesubCallback(const sensor_msgs::JointState& msg);
     Eigen::Matrix4d getSE3();
     Eigen::Matrix3d getAntisymmetric(Eigen::Matrix<double,3,1> v);
+    Eigen::Matrix3d quaternion2Rotation(double x,double y,double z,double w);
 };
 
 
@@ -70,7 +91,19 @@ void GravityCompensate::JointStatesubCallback(const sensor_msgs::JointState& msg
     for(int i=0;i<6;i++) theta[i]=msg.position[i];
 }
 
-
+Eigen::Matrix3d GravityCompensate::quaternion2Rotation(double x,double y,double z,double w){
+    Eigen::Matrix3d R;
+    R(0,0)=1-2*y*y-2*z*z;
+    R(0,1)=2*(x*y-z*w);
+    R(0,2)=2*(x*z+y*w);
+    R(1,0)=2*(x*y+z*w);
+    R(1,1)=1-2*x*x-2*z*z;
+    R(1,2)=2*(y*z-x*w);
+    R(2,0)=2*(x*z-y*w);
+    R(2,1)=2*(y*z+x*w);
+    R(2,2)=1-2*x*x-2*y*y;
+    return R;
+}
 
 Eigen::Matrix4d GravityCompensate::getSE3(){
     std::vector<double> theta_(theta);

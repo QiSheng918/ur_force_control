@@ -201,7 +201,7 @@ int GravityIdentify::urMove()
 
 void GravityIdentify::writeToYaml()
 {
-    std::ofstream fout("../config/param_identify.yaml");
+    std::ofstream fout("/home/leon/param_identify.yaml");
 
     YAML::Emitter out(fout);
     out << YAML::BeginMap;

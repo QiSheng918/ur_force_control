@@ -8,6 +8,7 @@
 #include "std_msgs/Float64.h"
 #include "Eigen/Dense"
 #include "sensor_msgs/JointState.h"
+#include <geometry_msgs/TwistStamped.h>
 
 // #define zeros_one (Eigen::Vector4d(0,0,0,1))
 
@@ -42,35 +43,44 @@ public:
         zeros_one<<0,0,0,1;
         wrench_base.resize(6);
         command_vel.resize(6);
+        actual_vel.resize(6);
 
         for(int i = 0; i < 6; i ++)
         {   
             command_vel[i]=0;
             wrench_base[i]=0;
-           
+            actual_vel[i]=0;       
         }
         //  std::cout<<"hello world"<<std::endl;
         std::cout<<std::endl;
         wrench_sub = nh.subscribe("/compensate_wrench_base_filter", 1000, &admittance::WrenchsubCallback,this);
         joint_states_sub=nh.subscribe("/joint_states",1000,&admittance::JointStatesubCallback,this);
+        tool_velocity_sub=nh.subscribe("/tool_velocity",1000,&admittance::ToolVelocitysubCallback,this);
         ur_pub = nh.advertise<std_msgs::String>("ur_driver/URScript",1000);
 
         ros::Duration(1.0).sleep();
        
-        ros::Rate loop_rate(20);
+        ros::Rate loop_rate(25);
         while (ros::ok())
         {
             
-            for(int i=0;i<3;i++){
-                command_vel[i]=0.0075*this->wrench_base[i];
-            }
-            for(int i=3;i<6;i++){
-                command_vel[i]=0.5*this->wrench_base[i];
-            }
+            // for(int i=0;i<3;i++){
+            //     double zdd=0.01*(this->wrench_base[i]-0.1*actual_vel[i]);
+            //     command_vel[i]+=0.04*zdd;
+            //     // command_vel[i]=0.0075*this->wrench_base[i];
+            // }
+            double zdd=0.01*(this->wrench_base[2]-50*actual_vel[2]);
+            command_vel[2]+=0.04*zdd;
+            
+            // for(int i=3;i<6;i++){
+            //     double zdd=100*(this->wrench_base[i]-1*actual_vel[i]);
+            //     command_vel[i]=0.04*zdd;
+            //     // command_vel[i]=0.5*this->wrench_base[i];
+            // }
             urMove();
-            for(int i=0;i<6;i++) std::cout<<command_vel[i]<<"###";
+            for(int i=0;i<6;i++) std::cout<<command_vel[i]<<"#   ";
             std::cout<<std::endl;
-            for(int i=0;i<6;i++) std::cout<<wrench_base[i]<<"###";
+            for(int i=0;i<6;i++) std::cout<<wrench_base[i]<<"#   ";
             
             ros::spinOnce();
             loop_rate.sleep();
@@ -81,10 +91,13 @@ private:
     ros::NodeHandle nh;
     ros::Subscriber wrench_sub;
     ros::Subscriber joint_states_sub;
+    ros::Subscriber tool_velocity_sub;
+
     ros::Publisher ur_pub;
     ros::Publisher wrench_pub;
     std::vector<double> command_vel;
     std::vector<double> wrench_base;
+    std::vector<double> actual_vel;
     
     Eigen::Matrix<double,6,6> twist;
     Eigen::Matrix<double,4,4> H0;
@@ -95,6 +108,7 @@ private:
 
     void WrenchsubCallback(const geometry_msgs::WrenchStamped& msg);
     void JointStatesubCallback(const sensor_msgs::JointState& msg);
+    void ToolVelocitysubCallback(const geometry_msgs::TwistStamped& msg);
 
 
     void limitVelocity(std::vector<double> &velocity);
@@ -105,6 +119,17 @@ private:
     Eigen::Matrix<double,6,6> getAdT(Eigen::Matrix4d T);
     void getSE3(std::vector<double> theta);
 };
+
+void admittance::ToolVelocitysubCallback(const geometry_msgs::TwistStamped& msg)
+{
+    actual_vel[0]=msg.twist.linear.x;
+    actual_vel[1]=msg.twist.linear.y;
+    actual_vel[2]=msg.twist.linear.z;
+    actual_vel[3]=msg.twist.angular.x;
+    actual_vel[4]=msg.twist.angular.y;
+    actual_vel[5]=msg.twist.angular.z;
+}
+
 
 
 //计算工具坐标系相对于基座坐标系的齐次变换矩阵以及雅克比矩阵

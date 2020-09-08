@@ -109,5 +109,11 @@ target_link_libraries(admittance_control_node
   ${EIGEN3_LIBRARIES}
 )
 
+add_executable(admittance_control_mass_node src/admittance_control_mass.cpp)
+target_link_libraries(admittance_control_mass_node
+  ${catkin_LIBRARIES}
+  ${EIGEN3_LIBRARIES}
+)
+
 
 
