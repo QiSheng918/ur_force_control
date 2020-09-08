@@ -111,6 +111,11 @@ target_link_libraries(fixed_point_admittance_control
   ${catkin_LIBRARIES}
 )
 
+add_executable(homogeneous_transformation_node src/homogeneous_transformation.cpp)
+target_link_libraries(homogeneous_transformation_node
+  ${catkin_LIBRARIES}
+)
+
 
 # add_executable(yaml_test src/yaml_test.cpp)
 # target_link_libraries(yaml_test

@@ -18,7 +18,7 @@
 class GravityCompensate
 {
 public:
-    GravityCompensate():move_group(PLANNING_GROUP)
+    GravityCompensate()
     {
         theta.resize(6);
         for(int i=0;i<6;i++){
@@ -38,6 +38,11 @@ public:
        
         joint_states_sub=nh.subscribe("/joint_states",1000,&GravityCompensate::JointStatesubCallback,this);
         ros::Duration(5).sleep();
+        ros::Rate loop_rate(20);
+        while(ros::ok()){
+            std::cout<<getSE3()<<std::endl;
+            loop_rate.sleep();
+        }
     }
 
 private:

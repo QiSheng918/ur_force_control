@@ -9,10 +9,11 @@
 #include "Eigen/Dense"
 #include "sensor_msgs/JointState.h"
 
+// #define zeros_one (Eigen::Vector4d(0,0,0,1))
 
 
 const Eigen::Matrix3d I33=Eigen::Matrix3d::Identity();
-const Eigen::Vector4d zeros_one(0,0,0,1);
+// const Eigen::Vector4d zeros_one(0,0,0,1);
 const Eigen::Matrix3d Zeros33=Eigen::Matrix3d::Zero();
 const double veloity_limit=0.5;
 
@@ -22,6 +23,7 @@ class admittance
 public:
     admittance()
     {
+        std::cout<<"hello world"<<std::endl;
         twist<<0,0,1,0,0,0,
                 0,-1,0,0.0892,0,0,
                 0,-1,0,0.0892,0,0.425,
@@ -37,6 +39,7 @@ public:
            0,1,0,0,
            0,0,1,0,
            0,0,0,1;
+        zeros_one<<0,0,0,1;
         wrench_base.resize(6);
         command_vel.resize(6);
 
@@ -46,8 +49,9 @@ public:
             wrench_base[i]=0;
            
         }
+        //  std::cout<<"hello world"<<std::endl;
         std::cout<<std::endl;
-        wrench_sub = nh.subscribe("/filtered_wrench", 1000, &admittance::WrenchsubCallback,this);
+        wrench_sub = nh.subscribe("/compensate_wrench_base_filter", 1000, &admittance::WrenchsubCallback,this);
         joint_states_sub=nh.subscribe("/joint_states",1000,&admittance::JointStatesubCallback,this);
         ur_pub = nh.advertise<std_msgs::String>("ur_driver/URScript",1000);
 
@@ -56,6 +60,7 @@ public:
         ros::Rate loop_rate(20);
         while (ros::ok())
         {
+            
             for(int i=0;i<3;i++){
                 command_vel[i]=0.0075*this->wrench_base[i];
             }
@@ -65,6 +70,8 @@ public:
             urMove();
             for(int i=0;i<6;i++) std::cout<<command_vel[i]<<"###";
             std::cout<<std::endl;
+            for(int i=0;i<6;i++) std::cout<<wrench_base[i]<<"###";
+            
             ros::spinOnce();
             loop_rate.sleep();
         }
@@ -84,6 +91,7 @@ private:
     Eigen::Matrix<double,4,4> T;
     Eigen::Matrix<double,6,6> J;
 
+    Eigen::Matrix<double,1,4> zeros_one;
 
     void WrenchsubCallback(const geometry_msgs::WrenchStamped& msg);
     void JointStatesubCallback(const sensor_msgs::JointState& msg);
@@ -101,6 +109,7 @@ private:
 
 //计算工具坐标系相对于基座坐标系的齐次变换矩阵以及雅克比矩阵
 void admittance::getSE3(std::vector<double> theta){
+
     Eigen::Matrix<double,3,3> SO3;
     Eigen::Matrix<double,4,4> SE3[6];
     Eigen::Matrix<double,3,3> W;
@@ -108,15 +117,19 @@ void admittance::getSE3(std::vector<double> theta){
     Eigen::Matrix<double,3,1> v;
 
     for(int i=0;i<6;i++){
+         
         W<<0,-twist(i,2),twist(i,1),
             twist(i,2), 0,-twist(i,0),
             -twist(i,1),twist(i,0),0;
         v<<twist(i,3),twist(i,4),twist(i,5);
+       
         SO3=I33+sin(theta[i])*W+(1-cos(theta[i]))*W*W;
         p=(theta[i]*I33+(1-cos(theta[i]))*W+(theta[i]-sin(theta[i]))*W*W)*v;
+
         SE3[i].block(0,0,3,3)=SO3;
         SE3[i].block(0,3,3,1)=p;
         SE3[i].block(3,0,1,4)=zeros_one;
+       
     }
     Eigen::Matrix<double,6,6> J_;
     Eigen::Matrix<double,4,4> I44=Eigen::Matrix4d::Identity();
@@ -154,7 +167,7 @@ Eigen::Matrix<double,6,6> admittance::getAdT(Eigen::Matrix<double,4,4> T)
 //力矩传感器回调函数
 void admittance::WrenchsubCallback(const geometry_msgs::WrenchStamped& msg)
 {
-  
+//    std::cout<<"hello world"<<std::endl;
     wrench_base[0] = msg.wrench.force.x;
     wrench_base[1] = msg.wrench.force.y;
     wrench_base[2] = msg.wrench.force.z;
@@ -167,8 +180,10 @@ void admittance::WrenchsubCallback(const geometry_msgs::WrenchStamped& msg)
 //机器日关节状态回调函数
 void admittance::JointStatesubCallback(const sensor_msgs::JointState& msg)
 {   
+    
     std::vector<double> theta(6,0);
     for(int i=0;i<6;i++) theta[i]=msg.position[i];
+   
     this->getSE3(theta);
 }
 
@@ -186,8 +201,8 @@ std::string admittance::double2string(double input)
 //限制速度大小
 void admittance::limitVelocity(std::vector<double> &velocity){
     for(int i=0;i<velocity.size();i++){
-        if(abs(velocity[i])<1e-4) velocity[i]=0;
-        else if(velocity[i]>veloity_limit) velocity[i]=veloity_limit;
+        // if(abs(velocity[i])<1e-4) velocity[i]=0;
+        if(velocity[i]>veloity_limit) velocity[i]=veloity_limit;
         else if(velocity[i]<-veloity_limit) velocity[i]=-veloity_limit;
         else ;
     }

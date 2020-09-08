@@ -130,7 +130,7 @@ void GravityIdentify::getSE3(){
     std::cout<<"calculate R started"<<std::endl;
     tf::StampedTransform transform;
     try{
-      listener.lookupTransform("base_link", "tool0",  
+      listener.lookupTransform("base", "tool0",  
                                ros::Time(0), transform);
     }
     catch (tf::TransformException ex){

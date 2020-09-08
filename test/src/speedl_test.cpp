@@ -35,8 +35,9 @@ int main(int argc, char *argv[])
         double time_duration = (ros::Time::now() - start_time).toSec();
         double x=-radius*angular_velocity*sin(angular_velocity*time_duration);
         double y=radius*angular_velocity*cos(angular_velocity*time_duration);
-        joint_velocity[0]=x;
-        joint_velocity[1]=y;
+        joint_velocity[0]=0;
+        joint_velocity[1]=0.1;
+        if(time_duration>2) ros::shutdown();
         ur_script_msgs.data = combinemsg(joint_velocity);
         ur_script_pub.publish(ur_script_msgs);
         ros::spinOnce();

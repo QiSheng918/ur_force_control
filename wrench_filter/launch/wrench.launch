@@ -3,7 +3,7 @@
 		pkg="optoforce_etherdaq_driver"
 		type="etherdaq_node"
 		name="etherdaq_node"
-		args="--address 192.168.1.105 --rate 100 --filter 4"
+		args="--address 192.168.1.105 --rate 100 --filter 5"
 	/>
 	<node
 		pkg="optoforce_etherdaq_driver"
