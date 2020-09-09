@@ -9,37 +9,16 @@
 #include "Eigen/Dense"
 #include "sensor_msgs/JointState.h"
 
-// #define zeros_one (Eigen::Vector4d(0,0,0,1))
 
-
-const Eigen::Matrix3d I33=Eigen::Matrix3d::Identity();
-// const Eigen::Vector4d zeros_one(0,0,0,1);
-const Eigen::Matrix3d Zeros33=Eigen::Matrix3d::Zero();
 const double veloity_limit=1;
+const double linear_damp=0.0075;
+const double angular_damp=0.5;
 
-
-class admittance
+class AdmittanceControlDrag
 {
 public:
-    admittance()
+    AdmittanceControlDrag()
     {
-        std::cout<<"hello world"<<std::endl;
-        twist<<0,0,1,0,0,0,
-                0,-1,0,0.0892,0,0,
-                0,-1,0,0.0892,0,0.425,
-                0,-1,0,0.0892,0,0.8173,
-                0,0,-1,0.1092,-0.8173,0,
-                0,-1,0,-0.0055,0,0.8173;
-
-        H0<<1,0,0,-0.8173,
-           0,0,-1,-0.1915,
-           0,1,0,-0.0055,
-           0,0,0,1;
-        T<<1,0,0,0,
-           0,1,0,0,
-           0,0,1,0,
-           0,0,0,1;
-        zeros_one<<0,0,0,1;
         wrench_base.resize(6);
         command_vel.resize(6);
 
@@ -47,31 +26,27 @@ public:
         {   
             command_vel[i]=0;
             wrench_base[i]=0;
-           
         }
-        //  std::cout<<"hello world"<<std::endl;
-        std::cout<<std::endl;
-        wrench_sub = nh.subscribe("/compensate_wrench_base_filter", 1000, &admittance::WrenchsubCallback,this);
-        joint_states_sub=nh.subscribe("/joint_states",1000,&admittance::JointStatesubCallback,this);
+      
+        wrench_sub = nh.subscribe("/compensate_wrench_base_filter", 1000, &AdmittanceControlDrag::WrenchsubCallback,this);
         ur_pub = nh.advertise<std_msgs::String>("ur_driver/URScript",1000);
 
         ros::Duration(1.0).sleep();
-       
-        ros::Rate loop_rate(20);
+        ROS_INFO("robot starts to move");
+
+        ros::Rate loop_rate(25);
         while (ros::ok())
         {
-            
+            //导纳控制仅添加阻尼项进行拖动控制
             for(int i=0;i<3;i++){
-                command_vel[i]=0.0075*this->wrench_base[i];
+                command_vel[i]=linear_damp*this->wrench_base[i];
             }
             for(int i=3;i<6;i++){
-                command_vel[i]=0.5*this->wrench_base[i];
+                command_vel[i]=angular_damp*this->wrench_base[i];
             }
             urMove();
-            for(int i=0;i<6;i++) std::cout<<command_vel[i]<<"###";
+            for(int i=0;i<6;i++) std::cout<<command_vel[i]<<"#   ";
             std::cout<<std::endl;
-            for(int i=0;i<6;i++) std::cout<<wrench_base[i]<<"###";
-            
             ros::spinOnce();
             loop_rate.sleep();
         }
@@ -79,95 +54,27 @@ public:
 
 private:
     ros::NodeHandle nh;
-    ros::Subscriber wrench_sub;
-    ros::Subscriber joint_states_sub;
+
+    ros::Subscriber wrench_sub; 
     ros::Publisher ur_pub;
-    ros::Publisher wrench_pub;
+
     std::vector<double> command_vel;
     std::vector<double> wrench_base;
     
-    Eigen::Matrix<double,6,6> twist;
-    Eigen::Matrix<double,4,4> H0;
-    Eigen::Matrix<double,4,4> T;
-    Eigen::Matrix<double,6,6> J;
 
-    Eigen::Matrix<double,1,4> zeros_one;
+
 
     void WrenchsubCallback(const geometry_msgs::WrenchStamped& msg);
-    void JointStatesubCallback(const sensor_msgs::JointState& msg);
-
-
     void limitVelocity(std::vector<double> &velocity);
     void urMove();
-
     std::string double2string(double input);
-
-    Eigen::Matrix<double,6,6> getAdT(Eigen::Matrix4d T);
-    void getSE3(std::vector<double> theta);
 };
 
 
-//计算工具坐标系相对于基座坐标系的齐次变换矩阵以及雅克比矩阵
-void admittance::getSE3(std::vector<double> theta){
 
-    Eigen::Matrix<double,3,3> SO3;
-    Eigen::Matrix<double,4,4> SE3[6];
-    Eigen::Matrix<double,3,3> W;
-    Eigen::Matrix<double,3,1> p;
-    Eigen::Matrix<double,3,1> v;
-
-    for(int i=0;i<6;i++){
-         
-        W<<0,-twist(i,2),twist(i,1),
-            twist(i,2), 0,-twist(i,0),
-            -twist(i,1),twist(i,0),0;
-        v<<twist(i,3),twist(i,4),twist(i,5);
-       
-        SO3=I33+sin(theta[i])*W+(1-cos(theta[i]))*W*W;
-        p=(theta[i]*I33+(1-cos(theta[i]))*W+(theta[i]-sin(theta[i]))*W*W)*v;
-
-        SE3[i].block(0,0,3,3)=SO3;
-        SE3[i].block(0,3,3,1)=p;
-        SE3[i].block(3,0,1,4)=zeros_one;
-       
-    }
-    Eigen::Matrix<double,6,6> J_;
-    Eigen::Matrix<double,4,4> I44=Eigen::Matrix4d::Identity();
-
-    Eigen::Matrix<double,6,1> temp;
-    for(int i=0;i<6;i++){
-        for(int j=0;j<6;j++) temp(j,0)=twist(i,j);
-        J_.block(0,i,6,1)=getAdT(I44)*temp;
-        I44=I44*SE3[i];
-    }   
-    this->T=I44*H0;
-    this->J=J_;
-}
-
-//计算齐次变换矩阵矩阵对应的伴随矩阵
-Eigen::Matrix<double,6,6> admittance::getAdT(Eigen::Matrix<double,4,4> T)
+//基坐标系力矩信息回调函数
+void AdmittanceControlDrag::WrenchsubCallback(const geometry_msgs::WrenchStamped& msg)
 {
-
-    Eigen::Matrix<double,3,3> p33,zeros33;
-    p33<<0,-T(2,3),T(1,3),
-       T(2,3), 0,-T(0,3),
-       -T(1,3),T(0,3),0;
-    Eigen::Matrix<double,3,3> R=T.block(0,0,3,3);
-    Eigen::Matrix<double,6,6> AdT;
-    for(int i=0;i<3;i++){
-        for(int j=0;j<3;j++)  zeros33(i,j)=0;
-    }
-    AdT.block(0,0,3,3)=R;
-    AdT.block(3,3,3,3)=R;
-    AdT.block(0,3,3,3)=p33*R;
-    AdT.block(3,0,3,3)=zeros33;
-    return AdT;
-}
-
-//力矩传感器回调函数
-void admittance::WrenchsubCallback(const geometry_msgs::WrenchStamped& msg)
-{
-//    std::cout<<"hello world"<<std::endl;
     wrench_base[0] = msg.wrench.force.x;
     wrench_base[1] = msg.wrench.force.y;
     wrench_base[2] = msg.wrench.force.z;
@@ -177,18 +84,8 @@ void admittance::WrenchsubCallback(const geometry_msgs::WrenchStamped& msg)
 }
 
 
-//机器日关节状态回调函数
-void admittance::JointStatesubCallback(const sensor_msgs::JointState& msg)
-{   
-    
-    std::vector<double> theta(6,0);
-    for(int i=0;i<6;i++) theta[i]=msg.position[i];
-   
-    this->getSE3(theta);
-}
-
 //浮点数转string
-std::string admittance::double2string(double input)
+std::string AdmittanceControlDrag::double2string(double input)
 {
     std::string string_temp;
     std::stringstream stream;
@@ -199,9 +96,9 @@ std::string admittance::double2string(double input)
 
 
 //限制速度大小
-void admittance::limitVelocity(std::vector<double> &velocity){
+void AdmittanceControlDrag::limitVelocity(std::vector<double> &velocity){
     for(int i=0;i<velocity.size();i++){
-        if(fabs(velocity[i])<1e-4) velocity[i]=0;
+        if(fabs(velocity[i])<1e-3) velocity[i]=0;
         if(velocity[i]>veloity_limit) velocity[i]=veloity_limit;
         else if(velocity[i]<-veloity_limit) velocity[i]=-veloity_limit;
         else ;
@@ -210,7 +107,7 @@ void admittance::limitVelocity(std::vector<double> &velocity){
 
 
 //UR机器人回调函数
-void admittance::urMove()
+void AdmittanceControlDrag::urMove()
 {
     this->limitVelocity(command_vel);
     std_msgs::String ur_script_msgs;
@@ -236,10 +133,10 @@ void admittance::urMove()
 
 int main(int argc, char *argv[])
 {
-    ros::init(argc, argv, "admittance_control_of_ur");
-    ros::AsyncSpinner spinner(2);
+    ros::init(argc, argv, "AdmittanceControlDragUR");
+    ros::AsyncSpinner spinner(1);
     spinner.start();
-    admittance ad;
+    AdmittanceControlDrag adg;
     ros::waitForShutdown();
     return 0;
 }

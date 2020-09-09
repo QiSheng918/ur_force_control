@@ -64,6 +64,7 @@
         "*.ipp": "cpp",
         "newstdvector": "cpp",
         "stdvector": "cpp",
-        "core": "cpp"
+        "core": "cpp",
+        "xstring": "cpp"
     }
 }
