@@ -64,23 +64,23 @@ public:
         ros::Time last_time=ros::Time::now();
         while (ros::ok())
         {
-            
+            ros::Time time_now=ros::Time::now();
             for(int i=0;i<3;i++){
-                double zdd=0.6*(this->wrench_base[i]-1*actual_vel[i]);
+                double xdd=0.6*(this->wrench_base[i]-1*actual_vel[i]);
                 // command_vel[i]+=0.04*zdd;
-                 command_vel[i]=zdd*(ros::Time::now()-last_time).toSec();
+                 command_vel[i]=xdd*(time_now-last_time).toSec();
                 // command_vel[i]=0.0075*this->wrench_base[i];
             }
             // double zdd=50*(this->wrench_base[3]-0.1*actual_vel[3]);
             // command_vel[3]=zdd*(ros::Time::now()-last_time).toSec();
      
             for(int i=3;i<6;i++){
-                double zdd=100*(this->wrench_base[i]-0.1*actual_vel[i]);
+                double xdd=100*(this->wrench_base[i]-0.1*actual_vel[i]);
                 // command_vel[i]=0.04*zdd;
-                 command_vel[i]=zdd*(ros::Time::now()-last_time).toSec();
+                 command_vel[i]=xdd*(time_now-last_time).toSec();
                 // command_vel[i]=0.5*this->wrench_base[i];
             }
-                   last_time=ros::Time::now();
+            last_time=time_now;
             urMove();
             for(int i=0;i<6;i++) std::cout<<command_vel[i]<<"#   ";
             std::cout<<std::endl;
