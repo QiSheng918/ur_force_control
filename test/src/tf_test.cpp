@@ -26,7 +26,6 @@ int main(int argc, char** argv){
   ros::NodeHandle node;
 
   tf::TransformListener listener;
-//   listener.waitForTransform("/turtle2", "/turtle1", ros::Time(0), ros::Duration(3.0))
 
   ros::Rate rate(10.0);
   while (node.ok()){
@@ -41,9 +40,7 @@ int main(int argc, char** argv){
     }
     tf::Matrix3x3 R(transform.getRotation());
     
-    // ROS_INFO_STREAM("the rotation matrix is:"<<R);
 // transform.getRotation().
-    // ROS_INFO_STREAM("the origin is:"<<transform.getOrigin().getX()<<","<<transform.getOrigin().getY()<<","<<transform.getOrigin().getZ());
     double x=transform.getRotation().getX();
     double y=transform.getRotation().getY();
     double z=transform.getRotation().getZ();
@@ -53,13 +50,8 @@ int main(int argc, char** argv){
     std::cout<<"the rotation matrix is:\n"<<getR(x,y,z,w)<<std::endl;
     // tf
     double roll,pitch,yaw;
-    // R.getR
     R.getRPY(roll,pitch,yaw);
     std::cout<<"the RPY is:"<<roll<<","<<pitch<<","<<yaw<<std::endl;
-    // transform.getRotation().
-    // transform.getRotation().getX();
-    // ROS_INFO_STREAM(""<<1);
-
     rate.sleep();
   }
   return 0;

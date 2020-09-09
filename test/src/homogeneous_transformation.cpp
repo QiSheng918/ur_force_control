@@ -66,18 +66,13 @@ public:
 private:
     ros::NodeHandle nh;
     ros::Subscriber joint_states_sub;
-   
-
-
-
+    
     std::vector<double> theta;
     Eigen::Matrix<double,6,6> twist;
     Eigen::Matrix<double,4,4> H0;
 
     tf::TransformListener listener;
 
-
-  
     void JointStatesubCallback(const sensor_msgs::JointState& msg);
     Eigen::Matrix4d getSE3();
     Eigen::Matrix<double,6,6> getAdT(Eigen::Matrix4d T);
@@ -87,7 +82,6 @@ private:
 
 Eigen::Matrix<double,6,6> PoeTest::getAdT(Eigen::Matrix4d T)
 {
-
     Eigen::Matrix<double,3,3> p33,zeros33;
     p33<<0,-T(2,3),T(1,3),
        T(2,3), 0,-T(0,3),
@@ -146,25 +140,14 @@ Eigen::Matrix4d PoeTest::getSE3(){
         SE3[i].block(3,0,1,4)=zeros_one;
     }
     Eigen::Matrix<double,4,4> I44=Eigen::Matrix<double,4,4>::Identity();
+     Eigen::Matrix<double,6,6> J_;
     Eigen::Matrix<double,6,1> temp;
     for(int i=0;i<6;i++){
         for(int j=0;j<6;j++) temp(j,0)=twist(i,j);
+        J_.block(0,i,6,1)=getAdT(I44)*temp;
         I44=I44*SE3[i];
     }
     return I44*H0;  
-    
-    Eigen::Matrix<double,6,6> J_;
-    Eigen::Matrix<double,4,4> I44;
-    I44<<1,0,0,0,
-         0,1,0,0,
-  	     0,0,1,0,
-	     0,0,0,1;
-    Eigen::Matrix<double,6,1> temp;
-    for(int i=0;i<6;i++){
-        for(int j=0;j<6;j++) temp(j,0)=twist(i,j);
-        J.block(0,i,6,1)=getAdT(I44)*temp;
-        I44=I44*SE3[i];
-    }
 }
 
 Eigen::Matrix3d PoeTest::getAntisymmetric(Eigen::Matrix<double,3,1> v){

@@ -24,8 +24,7 @@ void WrenchsubCallback(const geometry_msgs::WrenchStamped& msg)
             wrench_sum[i]+=wrench[i][j];
         }
     }
-
-
+    
     pub_msg.wrench.force.x=wrench_sum[0]/frequency;
     pub_msg.wrench.force.y=wrench_sum[1]/frequency;
     pub_msg.wrench.force.z=wrench_sum[2]/frequency;
