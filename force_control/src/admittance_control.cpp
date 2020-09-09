@@ -201,7 +201,7 @@ std::string admittance::double2string(double input)
 //限制速度大小
 void admittance::limitVelocity(std::vector<double> &velocity){
     for(int i=0;i<velocity.size();i++){
-        // if(abs(velocity[i])<1e-4) velocity[i]=0;
+        if(fabs(velocity[i])<1e-4) velocity[i]=0;
         if(velocity[i]>veloity_limit) velocity[i]=veloity_limit;
         else if(velocity[i]<-veloity_limit) velocity[i]=-veloity_limit;
         else ;

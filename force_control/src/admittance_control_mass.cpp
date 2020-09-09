@@ -61,22 +61,26 @@ public:
         ros::Duration(1.0).sleep();
        
         ros::Rate loop_rate(25);
+        ros::Time last_time=ros::Time::now();
         while (ros::ok())
         {
             
-            // for(int i=0;i<3;i++){
-            //     double zdd=0.01*(this->wrench_base[i]-0.1*actual_vel[i]);
-            //     command_vel[i]+=0.04*zdd;
-            //     // command_vel[i]=0.0075*this->wrench_base[i];
-            // }
-            double zdd=0.01*(this->wrench_base[2]-50*actual_vel[2]);
-            command_vel[2]+=0.04*zdd;
-            
-            // for(int i=3;i<6;i++){
-            //     double zdd=100*(this->wrench_base[i]-1*actual_vel[i]);
-            //     command_vel[i]=0.04*zdd;
-            //     // command_vel[i]=0.5*this->wrench_base[i];
-            // }
+            for(int i=0;i<3;i++){
+                double zdd=0.6*(this->wrench_base[i]-1*actual_vel[i]);
+                // command_vel[i]+=0.04*zdd;
+                 command_vel[i]=zdd*(ros::Time::now()-last_time).toSec();
+                // command_vel[i]=0.0075*this->wrench_base[i];
+            }
+            // double zdd=50*(this->wrench_base[3]-0.1*actual_vel[3]);
+            // command_vel[3]=zdd*(ros::Time::now()-last_time).toSec();
+     
+            for(int i=3;i<6;i++){
+                double zdd=100*(this->wrench_base[i]-0.1*actual_vel[i]);
+                // command_vel[i]=0.04*zdd;
+                 command_vel[i]=zdd*(ros::Time::now()-last_time).toSec();
+                // command_vel[i]=0.5*this->wrench_base[i];
+            }
+                   last_time=ros::Time::now();
             urMove();
             for(int i=0;i<6;i++) std::cout<<command_vel[i]<<"#   ";
             std::cout<<std::endl;
@@ -226,7 +230,7 @@ std::string admittance::double2string(double input)
 //限制速度大小
 void admittance::limitVelocity(std::vector<double> &velocity){
     for(int i=0;i<velocity.size();i++){
-        // if(abs(velocity[i])<1e-4) velocity[i]=0;
+        if(fabs(velocity[i])<1e-3) velocity[i]=0;
         if(velocity[i]>veloity_limit) velocity[i]=veloity_limit;
         else if(velocity[i]<-veloity_limit) velocity[i]=-veloity_limit;
         else ;
