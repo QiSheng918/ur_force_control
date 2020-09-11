@@ -52,12 +52,13 @@ public:
             //导纳控制添加质量项和阻尼项进行拖动控制
             for(int i=0;i<3;i++){
                 double xdd=linear_mass*(this->wrench_base[i]-linear_damp*actual_vel[i]);
-                command_vel[i]=xdd*(time_now-last_time).toSec();
+                command_vel[i]=actual_vel[i]+xdd*(time_now-last_time).toSec();
             }    
 
             for(int i=3;i<6;i++){
                 double xdd=angular_mass*(this->wrench_base[i]-angular_damp*actual_vel[i]);
-                command_vel[i]=xdd*(time_now-last_time).toSec();
+                command_vel[i]=actual_vel[i]+xdd*(time_now-last_time).toSec();
+                
             }
             last_time=time_now;
             urMove();
