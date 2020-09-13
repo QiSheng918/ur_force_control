@@ -29,7 +29,7 @@ void WrenchsubCallback(const geometry_msgs::WrenchStamped& msg)
         if(abs(wrench_sum[i])<1.5*frequency) wrench_sum[i]=0;
     }
     for(int i=3;i<6;i++){
-        if(abs(wrench_sum[i])<0.1*frequency) wrench_sum[i]=0;
+        if(abs(wrench_sum[i])<0.05*frequency) wrench_sum[i]=0;
     }
 
     pub_msg.wrench.force.x=wrench_sum[0]/frequency;

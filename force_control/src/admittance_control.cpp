@@ -111,8 +111,8 @@ void AdmittanceControlDrag::urMove()
 {
     this->limitVelocity(command_vel);
     std_msgs::String ur_script_msgs;
-    double time2move = 0.5;
-    double acc=1;
+    double time2move = 0.2;
+    double acc=0.5;
     std::string move_msg;
     move_msg = "speedl([";
     move_msg = move_msg + double2string(command_vel[0]) + ",";

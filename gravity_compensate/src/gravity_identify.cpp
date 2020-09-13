@@ -104,6 +104,7 @@ void GravityIdentify::WrenchsubCallback(const geometry_msgs::WrenchStamped& msg)
         wrenchb_temp[4] += msg.wrench.torque.y;
         wrenchb_temp[5] += msg.wrench.torque.z;
         if(sensor_point==100){
+            std::cout<<"average started"<<std::endl;
             // calculate 100 times force average date
             for(int i=0;i<6;i++){
                 wrenchb_temp[i]/=100;

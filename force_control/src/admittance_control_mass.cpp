@@ -12,10 +12,10 @@
 
 
 const double veloity_limit=1;
-const double linear_mass=0.6;
-const double linear_damp=1;
-const double angular_mass=100;
-const double angular_damp=0.1;
+const double linear_mass=0.02;
+const double linear_damp=100;
+const double angular_mass=1.5;
+const double angular_damp=2;
 
 
 class AdmittanceControlMassDrag
@@ -49,19 +49,24 @@ public:
         while (ros::ok())
         {
             time_now=ros::Time::now();
-            //导纳控制添加质量项和阻尼项进行拖动控制
+            // 导纳控制添加质量项和阻尼项进行拖动控制
             for(int i=0;i<3;i++){
                 double xdd=linear_mass*(this->wrench_base[i]-linear_damp*actual_vel[i]);
-                command_vel[i]=xdd*(time_now-last_time).toSec();
+                command_vel[i]=actual_vel[i]+xdd*(time_now-last_time).toSec();
             }    
+
 
             for(int i=3;i<6;i++){
                 double xdd=angular_mass*(this->wrench_base[i]-angular_damp*actual_vel[i]);
-                command_vel[i]=xdd*(time_now-last_time).toSec();
+                command_vel[i]=actual_vel[i]+xdd*(time_now-last_time).toSec();
             }
+            
+            // double xdd=2.5*(this->wrench_base[4]-1.25*command_vel[4]);
+            // command_vel[4]+=xdd*(time_now-last_time).toSec();
             last_time=time_now;
+            std::cout<<actual_vel[4]<<","<<command_vel[4]<<std::endl;
             urMove();
-            for(int i=0;i<6;i++) std::cout<<command_vel[i]<<"#   ";
+            // for(int i=0;i<6;i++) std::cout<<command_vel[i]<<"#   ";
             std::cout<<std::endl;
             ros::spinOnce();
             loop_rate.sleep();
@@ -125,7 +130,7 @@ std::string AdmittanceControlMassDrag::double2string(double input)
 //限制速度大小
 void AdmittanceControlMassDrag::limitVelocity(std::vector<double> &velocity){
     for(int i=0;i<velocity.size();i++){
-        if(fabs(velocity[i])<1e-3) velocity[i]=0;
+        if(fabs(velocity[i])<0.001) velocity[i]=0;
         if(velocity[i]>veloity_limit) velocity[i]=veloity_limit;
         else if(velocity[i]<-veloity_limit) velocity[i]=-veloity_limit;
         else ;
@@ -138,8 +143,8 @@ void AdmittanceControlMassDrag::urMove()
 {
     this->limitVelocity(command_vel);
     std_msgs::String ur_script_msgs;
-    double time2move = 0.5;
-    double acc=1;
+    double time2move = 0.2;
+    double acc=0.5;
     std::string move_msg;
     move_msg = "speedl([";
     move_msg = move_msg + double2string(command_vel[0]) + ",";
