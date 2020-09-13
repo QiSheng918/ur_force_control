@@ -78,7 +78,7 @@ private:
     void writeToYaml();
 };
 
-
+//四元数转旋转矩阵
 Eigen::Matrix3d GravityIdentify::quaternion2Rotation(double x,double y,double z,double w){
     Eigen::Matrix3d R;
     R(0,0)=1-2*y*y-2*z*z;
@@ -126,7 +126,7 @@ void GravityIdentify::WrenchsubCallback(const geometry_msgs::WrenchStamped& msg)
 }
 
 
-
+//利用tf_listener 查询机器人末端相对于基座的位姿
 void GravityIdentify::getSE3(){
     std::cout<<"calculate R started"<<std::endl;
     tf::StampedTransform transform;
@@ -149,6 +149,7 @@ void GravityIdentify::getSE3(){
     std::cout<<"calculate R finished"<<std::endl;
 }
 
+//获取向量对应的反对称矩阵
 Eigen::Matrix3d GravityIdentify::getAntisymmetric(Eigen::Matrix<double,3,1> v){
     Eigen::Matrix3d temp;
     temp<<0,v(2,0),-v(1,0),
@@ -157,6 +158,7 @@ Eigen::Matrix3d GravityIdentify::getAntisymmetric(Eigen::Matrix<double,3,1> v){
     return temp;
 }
 
+//计算负载的质心
 void GravityIdentify::calculateP(){
     std::cout<<"calculate P started"<<std::endl;
     Eigen::Matrix<double,pos_num*3,6> E;
@@ -170,6 +172,7 @@ void GravityIdentify::calculateP(){
     std::cout<<"the trans of gravity is\n"<<p<<std::endl;
 }
 
+//计算负载的质量以及力矩传感器的零点
 void GravityIdentify::calculateG(){
     
     Eigen::Matrix<double,pos_num*3,6> E;
@@ -180,6 +183,7 @@ void GravityIdentify::calculateG(){
     std::cout<<"the gravity and zero point of sensor is\n"<<G<<std::endl;
 }
 
+//利用Moveit控制机器人进行运动
 int GravityIdentify::urMove()
 {
     std::string pos="pose";
@@ -200,6 +204,7 @@ int GravityIdentify::urMove()
     return 0;
 }
 
+//将标识出的参数写入yaml文件
 void GravityIdentify::writeToYaml()
 {
     std::ofstream fout("/home/leon/param_identify.yaml");

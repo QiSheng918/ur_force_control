@@ -1,3 +1,7 @@
+// use hybird position/force to let ur5 to move a circie; x,y direction is controlled by velocity
+// z direction is controlled by pd control
+
+
 #include "ros/ros.h"
 #include "cmath"
 #include "std_msgs/String.h"

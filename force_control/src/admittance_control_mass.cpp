@@ -6,7 +6,7 @@
 #include "Eigen/Core"
 #include "cmath"
 #include "std_msgs/Float64.h"
-#include "Eigen/Dense"
+#include <Eigen/Dense>
 #include "sensor_msgs/JointState.h"
 #include <geometry_msgs/TwistStamped.h>
 
@@ -61,12 +61,10 @@ public:
                 command_vel[i]=actual_vel[i]+xdd*(time_now-last_time).toSec();
             }
             
-            // double xdd=2.5*(this->wrench_base[4]-1.25*command_vel[4]);
-            // command_vel[4]+=xdd*(time_now-last_time).toSec();
             last_time=time_now;
-            std::cout<<actual_vel[4]<<","<<command_vel[4]<<std::endl;
+            // std::cout<<actual_vel[4]<<","<<command_vel[4]<<std::endl;
             urMove();
-            // for(int i=0;i<6;i++) std::cout<<command_vel[i]<<"#   ";
+            
             std::cout<<std::endl;
             ros::spinOnce();
             loop_rate.sleep();
