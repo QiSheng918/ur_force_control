@@ -6,15 +6,16 @@
 #include <Eigen/Core>
 #include "cmath"
 #include "std_msgs/Float64.h"
+#include <std_msgs/String.h>
 #include "sensor_msgs/JointState.h"
 #include <geometry_msgs/TwistStamped.h>
 #include <tf/transform_listener.h>
 
 const double m=15;
-const double b=1;
+const double b=500;
 const double k=25;
 const double desire_fz=10;
-const double sigma=0.001;
+const double sigma=0;
 
 class VariableAdmittanceControl
 {
@@ -39,29 +40,31 @@ public:
         ur_pub = nh.advertise<std_msgs::String>("ur_driver/URScript",1000);
        
         ros::Duration(5.0).sleep();
-        ros::Rate loop_rate(25);
+        ros::Rate loop_rate(100);
         double delta_t=0.04;
         int loop_flag=0;
         int direction_flag=0;
+        ros::Time last_time=ros::Time::now();
         while (ros::ok())
         {   
             double actual_fz=this->wrench_base[2];
-            double zdd=1/m*((actual_fz-desire_fz)-b*(actual_vel[2]-0)-b*phi-sigma*(desire_fz-last_fz));
+            double zdd=0.5*((actual_fz-desire_fz)-b*(actual_vel[2]-0)-b*phi-sigma*(desire_fz-last_fz));
             last_fz=actual_fz;
-            
+            ros::Time now_time=ros::Time::now();
            
             if(b==0) phi=0;
             else phi+=sigma*(desire_fz-last_fz)/b;
-            command_vel[2]=zdd*delta_t;
+            command_vel[2]=actual_vel[2]+zdd*(now_time-last_time).toSec();
+            last_time=now_time;
             double error=actual_fz-desire_fz;
             if(fabs(error)<0.05) loop_flag++;
             if(loop_flag>20){
                 ROS_INFO_ONCE("STARTED X MOVE");
-                if(direction_flag<60) command_vel[1]=0.05;
-                else if(direction_flag<80) command_vel[1]=0;
-                else if(direction_flag<140) command_vel[1]=-0.05;
+                if(direction_flag<480) command_vel[1]=0.02;
+                else if(direction_flag<500) command_vel[1]=0;
+                else if(direction_flag<980) command_vel[1]=-0.02;
                 else command_vel[1]=0;
-                direction_flag=(direction_flag+1)%160;
+                direction_flag=(direction_flag+1)%1000;
             }
             std::cout<<command_vel[2]<<std::endl;
             // command_vel[2]=2;
@@ -70,6 +73,10 @@ public:
             ros::spinOnce();
             loop_rate.sleep();
         }
+        std::string move_msg="stopl(1)\n";
+        std_msgs::String ur_script_msgs;
+        ur_script_msgs.data = move_msg;
+        ur_pub.publish(ur_script_msgs);
     }
 
 private:
@@ -99,13 +106,13 @@ private:
 
 // 限制发送速度指令大小
 void VariableAdmittanceControl::limitVelocity(std::vector<double> &velocity){
-    std::cout<<"limit velocity"<<std::endl;
+    // std::cout<<"limit velocity"<<std::endl;
     for(int i=0;i<velocity.size();i++){
         // std::cout<<velocity[i]
         // std::cout<<fabs(velocity[i])<<std::endl;
-        if(fabs(velocity[i])<1e-4) velocity[i]=0;
-        if(velocity[i]>0.25) velocity[i]=0.25;
-        else if(velocity[i]<-0.25) velocity[i]=-0.25;
+        // if(fabs(velocity[i])<1e-4) velocity[i]=0;
+        if(velocity[i]>0.5) velocity[i]=0.5;
+        else if(velocity[i]<-0.5) velocity[i]=-0.5;
         else ;
     }
 }
@@ -185,8 +192,8 @@ std::string VariableAdmittanceControl::double2string(double input)
 void VariableAdmittanceControl::urMove()
 {
     std_msgs::String ur_script_msgs;
-    double time2move = 0.5;
-    double acc=1;
+    double time2move = 0.1;
+    double acc=0.5;
     std::string move_msg;
     move_msg = "speedl([";
     move_msg = move_msg + double2string(command_vel[0]) + ",";
