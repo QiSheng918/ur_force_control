@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   moveit_ros_planning
   moveit_ros_planning_interface
   tf
+  roslib
 )
 
 find_package(Eigen3 REQUIRED)
@@ -63,7 +64,7 @@ find_package(yaml-cpp REQUIRED)
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES gravity_compensate
-   CATKIN_DEPENDS roscpp sensor_msgs std_msgs moveit_core moveit_ros_planning_interface
+   CATKIN_DEPENDS roscpp sensor_msgs std_msgs moveit_core moveit_ros_planning_interface 
 #  DEPENDS system_lib
 )
 

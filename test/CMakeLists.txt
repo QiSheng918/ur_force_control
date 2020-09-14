@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   moveit_core
   moveit_ros_planning
   moveit_ros_planning_interface
+  roslib
 )
 
 ## System dependencies are found with CMake's conventions
@@ -104,11 +105,11 @@ target_link_libraries(homogeneous_transformation_node
 )
 
 
-# add_executable(yaml_test src/yaml_test.cpp)
-# target_link_libraries(yaml_test
-#   ${catkin_LIBRARIES}
-#   ${YAML_CPP_LIBRARIES}
-# )
+add_executable(yaml_test src/yaml_test.cpp)
+target_link_libraries(yaml_test
+  ${catkin_LIBRARIES}
+  ${YAML_CPP_LIBRARIES}
+)
 
 
 

@@ -2,11 +2,17 @@
 #include<yaml-cpp/yaml.h>
 #include<iostream>
 #include<fstream>
+#include <ros/package.h>
+
 using namespace std;
 int main(){
-     std::ofstream fout("/home/leon/param.yaml");
-
-     YAML::Emitter out(fout);
+    
+    std::string dir_package, dir_package_file;
+    dir_package = ros::package::getPath("test");
+    dir_package_file = dir_package + "/config/param.yaml";
+    std::ofstream fout(dir_package_file);
+    std::cout<<dir_package_file<<std::endl;
+    YAML::Emitter out(fout);
     out << YAML::BeginMap;
     
     out << YAML::Key << "int_param";
@@ -23,4 +29,6 @@ int main(){
     out << YAML::Key << "str_param";
     out << YAML::Value << "test";
     out << YAML::EndMap;
+    fout.close();
+    return 0;
 }
