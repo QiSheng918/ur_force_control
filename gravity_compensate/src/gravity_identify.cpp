@@ -13,6 +13,7 @@
 #include <tf/transform_listener.h>
 #include <yaml-cpp/yaml.h>
 #include <fstream>
+#include <ros/package.h>
 
 static const std::string PLANNING_GROUP = "manipulator";
 const int pos_num=9;
@@ -207,7 +208,10 @@ int GravityIdentify::urMove()
 //将标识出的参数写入yaml文件
 void GravityIdentify::writeToYaml()
 {
-    std::ofstream fout("/home/leon/param_identify.yaml");
+    std::string dir_package,dir_param_file;
+    dir_package = ros::package::getPath("gravity_compensate");
+    dir_param_file = dir_package + "/config/param.yaml";
+    std::ofstream fout(dir_param_file);
 
     YAML::Emitter out(fout);
     out << YAML::BeginMap;
@@ -233,7 +237,7 @@ void GravityIdentify::writeToYaml()
     out << YAML::Value << p(5,0)-G(3,0)*p(1,0)+G(4,0)*p(0,0);
     out << YAML::EndSeq;
     out << YAML::EndMap;
-
+    fout.close();
 }
 
 int main(int argc, char *argv[])
