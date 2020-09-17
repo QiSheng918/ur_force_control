@@ -12,9 +12,9 @@
 #include <tf/transform_listener.h>
 
 const double m=15;
-const double b=500;
+// const double b=500;
 const double k=25;
-const double desire_fz=15;
+const double desire_fz=10;
 const double sigma=0.0;
 
 class VariableAdmittanceControl
@@ -26,13 +26,16 @@ public:
         actual_vel.resize(6);
         wrench_base.resize(6);
         actual_pos.resize(6);
+        command_pos.resize(6);
         for(int i = 0; i < 6; i ++)
         {   
             command_vel[i]=0;
             actual_vel[i]=0;
             wrench_base[i]=0;
             actual_pos[i]=0;
+            command_pos[i]=0;
         }
+
         phi=0;
         last_fz=0;
         wrench_sub = nh.subscribe("/compensate_wrench_base", 1000, &VariableAdmittanceControl::WrenchsubCallback,this);
@@ -40,28 +43,70 @@ public:
         ur_pub = nh.advertise<std_msgs::String>("ur_driver/URScript",1000);
        
         ros::Duration(5.0).sleep();
-        ros::Rate loop_rate(50);
-        double delta_t=0.04;
+        
+        tf::StampedTransform transform;
+
+        try{
+            listener.lookupTransform("base", "tool0",  
+                                ros::Time(0), transform);
+        }
+        catch (tf::TransformException ex){
+            ROS_ERROR("%s",ex.what());
+            ros::Duration(1.0).sleep();
+        }
+        actual_pos[0]=transform.getOrigin().getX();
+        actual_pos[1]=transform.getOrigin().getY();
+        actual_pos[2]=transform.getOrigin().getZ();
+        double x=transform.getRotation().getX();
+        double y=transform.getRotation().getY();
+        double z=transform.getRotation().getZ();
+        double w=transform.getRotation().getW();
+
+
+        Eigen::Matrix3d rotation_matrix=quaternion2Rotation(x,y,z,w);
+        double theta=acos((rotation_matrix(0,0)+rotation_matrix(1,1)+rotation_matrix(2,2)-1)/2);
+        double rx=1/(2*sin(theta))*(rotation_matrix(2,1)-rotation_matrix(1,2));
+        double ry=1/(2*sin(theta))*(rotation_matrix(0,2)-rotation_matrix(2,0));
+        double rz=1/(2*sin(theta))*(rotation_matrix(1,0)-rotation_matrix(0,1));
+
+        actual_pos[3]=rx*theta;
+        actual_pos[4]=ry*theta;
+        actual_pos[5]=rz*theta;
+        for(int i=0;i<6;i++){
+            command_pos[i]=actual_pos[i];
+            
+        }
+        command_pos[2]-=0.01;
+        this->urMoveL(command_pos);
+        ros::Duration(1.0).sleep();
+
+
         int loop_flag=0;
         int direction_flag=0;
         double last_error=0;
         ros::Time last_time=ros::Time::now();
+
+        const double b=250;
+        ros::Rate loop_rate(50);
         while (ros::ok())
         {   
+            
+
+            
+
             double actual_fz=this->wrench_base[2];
             double vel_now=actual_vel[2];
             double error=actual_fz-desire_fz;
             double sigma=1/(1*fabs(error)+1*fabs(last_error)+10);
             
-            // if(zdd>2) zdd=2;
-            // else if(zdd<-2) zdd=-2;
+            
             ros::Time now_time=ros::Time::now();
             // ROS_INFO_STREAM("the actual vel")
             phi-=sigma*(last_error)/b;
             double zdd=1*((actual_fz-desire_fz)-b*(vel_now-0)-b*phi);
             last_error=error;
             command_vel[2]=vel_now+zdd*(now_time-last_time).toSec();
-            last_time=now_time;
+            
             last_fz=actual_fz;
             // double error=actual_fz-desire_fz;
             if(fabs(error)<0.01) loop_flag++;
@@ -74,12 +119,29 @@ public:
                 direction_flag=(direction_flag+1)%1000;
             }
             command_vel[1]=0;
+            ROS_INFO_STREAM("the actual force is: "<<actual_fz);
             ROS_INFO_STREAM("the actual vel is:"<<vel_now<<" and command_vel is: "<<command_vel[2]<<" the phi is: "<<phi);
-            // ROS_INFO_STREAM("the actual vel is:"<<vel_now<<" and command_vel is: "<<command_vel[2]);
-            // std::cout<<command_vel[2]<<std::endl;
-            // command_vel[2]=2;
             this->limitVelocity(command_vel);
-            this->urMove();
+            // command_pos[2]+=0.01;
+            // for(int i=0;i<6;i++){
+                
+            //     std::cout<<command_pos[i]<<",";
+            // }
+            // std::cout<<std::endl;
+            try{
+                listener.lookupTransform("base", "tool0",  
+                                    ros::Time(0), transform);
+            }
+            catch (tf::TransformException ex){
+                ROS_ERROR("%s",ex.what());
+                ros::Duration(1.0).sleep();
+            }
+            
+            actual_pos[2]=transform.getOrigin().getZ();
+            command_pos[2]=actual_pos[2]+command_vel[2]*(now_time-last_time).toSec();
+            ROS_INFO_STREAM("the error of command_pos and actual_pos is: "<<command_pos[2]-actual_pos[2]);
+            this->urMoveL(command_pos);
+            last_time=now_time;
             ros::spinOnce();
             loop_rate.sleep();
         }
@@ -101,6 +163,7 @@ private:
     std::vector<double> actual_vel;
     std::vector<double> wrench_base;
     std::vector<double> actual_pos;
+    std::vector<double> command_pos;
     double phi;
     double last_fz;
 
@@ -108,6 +171,7 @@ private:
     void ToolVelocitysubCallback(const geometry_msgs::TwistStamped& msg);
     void getSE3();
     void urMove();
+    void urMoveL(std::vector<double> &command_pose);
     std::string double2string(double input);
     void limitVelocity(std::vector<double> &velocity);
     Eigen::Matrix3d quaternion2Rotation(double x,double y,double z,double w);
@@ -121,8 +185,8 @@ void VariableAdmittanceControl::limitVelocity(std::vector<double> &velocity){
         // std::cout<<velocity[i]
         // std::cout<<fabs(velocity[i])<<std::endl;
         if(fabs(velocity[i])<1e-4) velocity[i]=0;
-        else if(velocity[i]>0.5) velocity[i]=0.5;
-        else if(velocity[i]<-0.5) velocity[i]=-0.5;
+        else if(velocity[i]>1) velocity[i]=1;
+        else if(velocity[i]<-1) velocity[i]=-1;
         else ;
     }
 }
@@ -203,7 +267,7 @@ void VariableAdmittanceControl::urMove()
 {
     std_msgs::String ur_script_msgs;
     double time2move = 0.1;
-    double acc=0.5;
+    double acc=2;
     std::string move_msg;
     move_msg = "speedl([";
     move_msg = move_msg + double2string(command_vel[0]) + ",";
@@ -217,6 +281,48 @@ void VariableAdmittanceControl::urMove()
     move_msg = move_msg + double2string(time2move) + ")";
     move_msg = move_msg + "\n";
     ur_script_msgs.data=move_msg;
+    ur_pub.publish(ur_script_msgs);
+}
+
+
+
+//UR机器人运动函数
+void VariableAdmittanceControl::urMoveL(std::vector<double> &command_pose)
+{
+
+
+    std_msgs::String ur_script_msgs;
+    double time2move = 0.1;
+    double acc=2;
+    std::string move_msg;
+    move_msg = "movel(p[";
+    move_msg = move_msg + double2string(command_pose[0]) + ",";
+    move_msg = move_msg + double2string(command_pose[1]) + ",";
+    move_msg = move_msg + double2string(command_pose[2]) + ",";
+    move_msg = move_msg + double2string(command_pose[3]) + ",";
+    move_msg = move_msg + double2string(command_pose[4]) + ",";
+    move_msg = move_msg + double2string(command_pose[5]) + "]";
+    move_msg = move_msg + ",";
+    move_msg = move_msg + double2string(0.3) + ",";
+    move_msg = move_msg + double2string(0.5) + ")";
+    // move_msg = move_msg + double2string(1) + ")";
+
+    move_msg = move_msg + "\n";
+
+    // move_msg = "movel(p[";
+    // move_msg = move_msg + double2string(command_pose[0]) + ",";
+    // move_msg = move_msg + double2string(command_pose[1]) + ",";
+    // move_msg = move_msg + double2string(command_pose[2]) + ",";
+    // move_msg = move_msg + double2string(command_pose[3]) + ",";
+    // move_msg = move_msg + double2string(command_pose[4]) + ",";
+    // move_msg = move_msg + double2string(command_pose[5]) + "]";
+    // move_msg = move_msg + ",";
+    // move_msg = move_msg + double2string(1) + ",";
+    // move_msg = move_msg + double2string(0.5) + ",";
+    // move_msg = move_msg + double2string(1) + ")";
+    // move_msg = move_msg + "\n";
+    ur_script_msgs.data=move_msg;
+    // ROS_INFO_STREAM("the command pose is:"<<ur_script_msgs.data);
     ur_pub.publish(ur_script_msgs);
 }
 

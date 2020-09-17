@@ -46,7 +46,10 @@ int main(int argc, char *argv[])
         command_pose[i]=0;
     }
 
-    ros::Duration(4).sleep();
+    ros::Duration(4).sleep(); 
+    ros::Rate loop_rate(2); 
+        std_msgs::String ur_script_msgs;
+    for(int i=0;i<2;i++){
     tf::StampedTransform transform;
     try{
       listener.lookupTransform("base", "tool0",  
@@ -56,7 +59,7 @@ int main(int argc, char *argv[])
       ROS_ERROR("%s",ex.what());
       ros::Duration(1.0).sleep();
     }
-    std_msgs::String ur_script_msgs;
+
     // initial_pose[0]=transform.getOrigin().getX();
     // initial_pose[1]=transform.getOrigin().getY();
     // initial_pose[2]=transform.getOrigin().getZ();
@@ -81,19 +84,25 @@ int main(int argc, char *argv[])
     initial_pose[3]=rx*theta;
     initial_pose[4]=ry*theta;
     initial_pose[5]=rz*theta;
-    command_pose[0]=initial_pose[0]-0.05;
+
+
+
     
     
-    for(int i=1;i<6;i++) command_pose[i]=command_pose[i];
     
+    for(int i=0;i<6;i++) command_pose[i]=initial_pose[i];
+    command_pose[2]=initial_pose[2];
+    command_pose[2]+=0.1;
     for(int i=0;i<6;i++) std::cout<<command_pose[i]<<","; 
     std::cout<<std::endl;
    
 
     ur_script_msgs.data = combinemsg(command_pose,0.5);
     std::cout<<ur_script_msgs.data<<std::endl;
-    // ur_script_pub.publish(ur_script_msgs);
-    ros::Duration(5).sleep();
+    ur_script_pub.publish(ur_script_msgs);
+    loop_rate.sleep();
+    }
+    ros::Duration(1).sleep();
 
 
     std::string move_msg="stopl(1)\n";
@@ -116,7 +125,7 @@ std::string combinemsg(std::vector<double> command_pose, double acc)
 {
     double time2move = 1;
     std::string move_msg;
-    move_msg = "movel([";
+    move_msg = "movel(p[";
     move_msg = move_msg + double2string(command_pose[0]) + ",";
     move_msg = move_msg + double2string(command_pose[1]) + ",";
     move_msg = move_msg + double2string(command_pose[2]) + ",";
@@ -126,7 +135,7 @@ std::string combinemsg(std::vector<double> command_pose, double acc)
     move_msg = move_msg + ",";
     move_msg = move_msg + double2string(1) + ",";
     move_msg = move_msg + double2string(0.4) + ",";
-    move_msg = move_msg + double2string(4) + ")";
+    move_msg = move_msg + double2string(1) + ")";
 
     move_msg = move_msg + "\n";
    
