@@ -10,7 +10,7 @@ std::vector<double> initial_joint_values;
 bool flag = false;
 
 std::string double2string(double input);
-std::string combinemsg(std::vector<double> velocity, double acc = 1.2);
+std::string combinemsg(std::vector<double> velocity, double acc = 1);
 
 const double radius=0.05;
 const double angular_velocity=0.5;
@@ -27,22 +27,39 @@ int main(int argc, char *argv[])
     std_msgs::String ur_script_msgs;
     std::vector<double> joint_velocity = {0, 0, 0, 0, 0, 0};
     // here we only test the last joint of ur
-   
-    ros::Time start_time = ros::Time::now();
-    ros::Rate loop_rate(50);
+    joint_velocity[1]=0.2;
+    ur_script_msgs.data = combinemsg(joint_velocity,0.5);
+    ur_script_pub.publish(ur_script_msgs);
+    ros::Rate loop_rate(100);
+    // for(int i=0;i<100;i++){
+    //     loop_rate.sleep();
+    // }
+    ros::Duration(0.5).sleep();
+    
+    joint_velocity[1]=-0.2;
+    ur_script_msgs.data = combinemsg(joint_velocity,0.5);
+    ur_script_pub.publish(ur_script_msgs);
+    ros::Duration(0.5).sleep();
+
+    // joint_velocity[1]=0;
+    // ur_script_msgs.data = combinemsg(joint_velocity);
+    // ur_script_pub.publish(ur_script_msgs);
+    // ros::Duration(0.5).sleep();
+    // ros::Time start_time = ros::Time::now();
+    // ros::Rate loop_rate(50);
     // for(int i=0;i<500;i++){
-    while(ros::ok()){
-        double time_duration = (ros::Time::now() - start_time).toSec();
-        double x=-radius*angular_velocity*sin(angular_velocity*time_duration);
-        double y=radius*angular_velocity*cos(angular_velocity*time_duration);
-        joint_velocity[0]=0;
-        joint_velocity[1]=0.1;
-        if(time_duration>2) ros::shutdown();
-        ur_script_msgs.data = combinemsg(joint_velocity);
-        ur_script_pub.publish(ur_script_msgs);
-        ros::spinOnce();
-        loop_rate.sleep();
-    }
+    // while(ros::ok()){
+    //     double time_duration = (ros::Time::now() - start_time).toSec();
+    //     double x=-radius*angular_velocity*sin(angular_velocity*time_duration);
+    //     double y=radius*angular_velocity*cos(angular_velocity*time_duration);
+    //     joint_velocity[0]=0;
+    //     joint_velocity[1]=0.1;
+    //     if(time_duration>2) ros::shutdown();
+    //     ur_script_msgs.data = combinemsg(joint_velocity);
+    //     ur_script_pub.publish(ur_script_msgs);
+    //     ros::spinOnce();
+    //     loop_rate.sleep();
+    // }
     std::string move_msg="stopl(1)\n";
     ur_script_msgs.data = move_msg;
     ur_script_pub.publish(ur_script_msgs);
@@ -61,7 +78,7 @@ std::string double2string(double input)
 
 std::string combinemsg(std::vector<double> velocity, double acc)
 {
-    double time2move = 0.5;
+    double time2move = 1;
     std::string move_msg;
     move_msg = "speedl([";
     move_msg = move_msg + double2string(velocity[0]) + ",";
@@ -71,7 +88,7 @@ std::string combinemsg(std::vector<double> velocity, double acc)
     move_msg = move_msg + double2string(velocity[4]) + ",";
     move_msg = move_msg + double2string(velocity[5]) + "]";
     move_msg = move_msg + ",";
-    move_msg = move_msg + double2string(0.5) + ",";
+    move_msg = move_msg + double2string(acc) + ",";
     move_msg = move_msg + double2string(time2move) + ")";
     move_msg = move_msg + "\n";
     return move_msg; 

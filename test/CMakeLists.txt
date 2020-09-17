@@ -64,13 +64,18 @@ include_directories(
 #   ${catkin_LIBRARIES}
 # )
 
-# add_executable(tf_test src/tf_test.cpp)
-# target_link_libraries(tf_test
-#   ${catkin_LIBRARIES}
-# )
+add_executable(tf_test src/tf_test.cpp)
+target_link_libraries(tf_test
+  ${catkin_LIBRARIES}
+)
 
 add_executable(mean_filter src/mean_filter.cpp)
 target_link_libraries(mean_filter
+  ${catkin_LIBRARIES}
+)
+
+add_executable(movel_test src/movel_test.cpp)
+target_link_libraries(movel_test
   ${catkin_LIBRARIES}
 )
 

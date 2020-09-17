@@ -14,8 +14,8 @@
 const double m=15;
 const double b=500;
 const double k=25;
-const double desire_fz=10;
-const double sigma=0;
+const double desire_fz=15;
+const double sigma=0.0;
 
 class VariableAdmittanceControl
 {
@@ -40,24 +40,31 @@ public:
         ur_pub = nh.advertise<std_msgs::String>("ur_driver/URScript",1000);
        
         ros::Duration(5.0).sleep();
-        ros::Rate loop_rate(100);
+        ros::Rate loop_rate(50);
         double delta_t=0.04;
         int loop_flag=0;
         int direction_flag=0;
+        double last_error=0;
         ros::Time last_time=ros::Time::now();
         while (ros::ok())
         {   
             double actual_fz=this->wrench_base[2];
-            double zdd=0.5*((actual_fz-desire_fz)-b*(actual_vel[2]-0)-b*phi-sigma*(desire_fz-last_fz));
-            last_fz=actual_fz;
-            ros::Time now_time=ros::Time::now();
-           
-            if(b==0) phi=0;
-            else phi+=sigma*(desire_fz-last_fz)/b;
-            command_vel[2]=actual_vel[2]+zdd*(now_time-last_time).toSec();
-            last_time=now_time;
+            double vel_now=actual_vel[2];
             double error=actual_fz-desire_fz;
-            if(fabs(error)<0.05) loop_flag++;
+            double sigma=1/(1*fabs(error)+1*fabs(last_error)+10);
+            
+            // if(zdd>2) zdd=2;
+            // else if(zdd<-2) zdd=-2;
+            ros::Time now_time=ros::Time::now();
+            // ROS_INFO_STREAM("the actual vel")
+            phi-=sigma*(last_error)/b;
+            double zdd=1*((actual_fz-desire_fz)-b*(vel_now-0)-b*phi);
+            last_error=error;
+            command_vel[2]=vel_now+zdd*(now_time-last_time).toSec();
+            last_time=now_time;
+            last_fz=actual_fz;
+            // double error=actual_fz-desire_fz;
+            if(fabs(error)<0.01) loop_flag++;
             if(loop_flag>20){
                 ROS_INFO_ONCE("STARTED X MOVE");
                 if(direction_flag<480) command_vel[1]=0.02;
@@ -66,7 +73,10 @@ public:
                 else command_vel[1]=0;
                 direction_flag=(direction_flag+1)%1000;
             }
-            std::cout<<command_vel[2]<<std::endl;
+            command_vel[1]=0;
+            ROS_INFO_STREAM("the actual vel is:"<<vel_now<<" and command_vel is: "<<command_vel[2]<<" the phi is: "<<phi);
+            // ROS_INFO_STREAM("the actual vel is:"<<vel_now<<" and command_vel is: "<<command_vel[2]);
+            // std::cout<<command_vel[2]<<std::endl;
             // command_vel[2]=2;
             this->limitVelocity(command_vel);
             this->urMove();
@@ -110,8 +120,8 @@ void VariableAdmittanceControl::limitVelocity(std::vector<double> &velocity){
     for(int i=0;i<velocity.size();i++){
         // std::cout<<velocity[i]
         // std::cout<<fabs(velocity[i])<<std::endl;
-        // if(fabs(velocity[i])<1e-4) velocity[i]=0;
-        if(velocity[i]>0.5) velocity[i]=0.5;
+        if(fabs(velocity[i])<1e-4) velocity[i]=0;
+        else if(velocity[i]>0.5) velocity[i]=0.5;
         else if(velocity[i]<-0.5) velocity[i]=-0.5;
         else ;
     }
