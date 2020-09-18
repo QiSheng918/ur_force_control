@@ -102,7 +102,7 @@ public:
             
             ros::Time now_time=ros::Time::now();
             ROS_INFO_STREAM("the actual vel");
-            phi-=sigma*(last_error)/b;
+            // phi-=sigma*(last_error)/b;
             double zdd=5*((actual_fz-desire_fz)-b*(vel_now-0)-b*phi);
             last_error=error;
             command_vel[2]=actual_vel[2]+zdd*(now_time-last_time).toSec();
@@ -110,7 +110,7 @@ public:
             last_fz=actual_fz;
             // double error=actual_fz-desire_fz;
             if(fabs(error)<0.01) loop_flag++;
-            if(loop_flag>100){
+            if(loop_flag>20){
                 ROS_INFO_ONCE("STARTED X MOVE");
                 if(direction_flag<480) command_vel[1]=0.02;
                 else if(direction_flag<500) command_vel[1]=0;
@@ -122,26 +122,8 @@ public:
             ROS_INFO_STREAM("the actual force is: "<<actual_fz);
             ROS_INFO_STREAM("the actual vel is:"<<vel_now<<" and command_vel is: "<<command_vel[2]<<" the phi is: "<<phi);
             this->limitVelocity(command_vel);
-            // command_pos[2]+=0.01;
-            // for(int i=0;i<6;i++){
-                
-            //     std::cout<<command_pos[i]<<",";
-            // }
-            // std::cout<<std::endl;
-            try{
-                listener.lookupTransform("base", "tool0",  
-                                    ros::Time(0), transform);
-            }
-            catch (tf::TransformException ex){
-                ROS_ERROR("%s",ex.what());
-                ros::Duration(1.0).sleep();
-            }
-            actual_pos[1]=transform.getOrigin().getY();
-            actual_pos[2]=transform.getOrigin().getZ();
-            // command_pos[1]=actual_pos[1]+command_vel[1]*(now_time-last_time).toSec();
-            command_pos[2]=actual_pos[2]+command_vel[2]*(now_time-last_time).toSec();
-            ROS_INFO_STREAM("the error of command_pos and actual_pos is: "<<command_pos[2]-actual_pos[2]);
-            this->urMoveL(command_pos);
+ 
+            this->urMove();
             last_time=now_time;
             ros::spinOnce();
             loop_rate.sleep();
@@ -268,7 +250,7 @@ void VariableAdmittanceControl::urMove()
 {
     std_msgs::String ur_script_msgs;
     double time2move = 0.1;
-    double acc=2;
+    double acc=0.5;
     std::string move_msg;
     move_msg = "speedl([";
     move_msg = move_msg + double2string(command_vel[0]) + ",";
@@ -304,8 +286,8 @@ void VariableAdmittanceControl::urMoveL(std::vector<double> &command_pose)
     move_msg = move_msg + double2string(command_pose[4]) + ",";
     move_msg = move_msg + double2string(command_pose[5]) + "]";
     move_msg = move_msg + ",";
-    move_msg = move_msg + double2string(0.25) + ",";
-    move_msg = move_msg + double2string(0.5) + ")";
+    move_msg = move_msg + double2string(0.3) + ",";
+    move_msg = move_msg + double2string(0.3) + ")";
 
     move_msg = move_msg + "\n";
 

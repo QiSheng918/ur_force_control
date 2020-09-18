@@ -102,6 +102,12 @@ target_link_libraries(variable_admittance_control_node
   ${EIGEN3_LIBRARIES}
 )
 
+add_executable(variable_admittance_control_speedl_node src/variable_admittance_control_speedl.cpp)
+target_link_libraries(variable_admittance_control_speedl_node
+  ${catkin_LIBRARIES}
+  ${EIGEN3_LIBRARIES}
+)
+
 
 add_executable(admittance_control_node src/admittance_control.cpp)
 target_link_libraries(admittance_control_node

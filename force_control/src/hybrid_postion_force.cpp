@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
             // else if(loop_flag>=200 && loop_flag<=400) joint_velocity[1]=0.02;
             // else joint_velocity[1]=0;
         }
-        // joint_velocity[1]=0;
+        joint_velocity[1]=0;
         
         double vel=0.001*error+0.0005*(error-last_error);
         last_error=error;
