@@ -122,4 +122,10 @@ target_link_libraries(admittance_control_mass_node
 )
 
 
+add_executable(oritentation_admittance_control_node src/oritentation_admittance_control.cpp)
+target_link_libraries(oritentation_admittance_control_node
+  ${catkin_LIBRARIES}
+  ${EIGEN3_LIBRARIES}
+)
+
 
