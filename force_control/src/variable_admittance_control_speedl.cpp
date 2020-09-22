@@ -14,7 +14,7 @@
 const double m=15;
 // const double b=500;
 const double k=25;
-const double desire_fz=10;
+const double desire_fz=8;
 const double sigma=0.0;
 
 class VariableAdmittanceControl
