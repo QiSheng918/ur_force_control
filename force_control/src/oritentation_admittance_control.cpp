@@ -52,7 +52,9 @@ int main(int argc, char *argv[])
         double f_vel=0.002*fz_error+0.000*(fz_error-last_error);
         double w_vel=0.2*wz_error+0.000*(fz_error-last_error);
         if(fabs(wz_error)<0.05 && fabs(fz_error)<0.05) flag++;
-        if(flag>200){
+        ROS_INFO_STREAM("flag is: "<<flag);
+        if(flag>100){
+            ROS_INFO_ONCE("START X MOVE");
             if(init_flag==0){
                 start_time=ros::Time::now();
                 init_flag=1;
@@ -62,9 +64,9 @@ int main(int argc, char *argv[])
             // double y=radius*angular_velocity*cos(angular_velocity*time_duration);
             // joint_velocity[0]=x;
             // joint_velocity[1]=y;
-            loop_flag=(loop_flag+1)%800;
+            loop_flag=(loop_flag+1)%2000;
             // loop_flag++;
-            if(loop_flag<400) joint_velocity[1]=0.01;
+            if(loop_flag<1000) joint_velocity[1]=0.01;
             else joint_velocity[1]=-0.01;
             // else if(loop_flag>=200 && loop_flag<=400) joint_velocity[1]=0.02;
             // else joint_velocity[1]=0;
@@ -73,11 +75,11 @@ int main(int argc, char *argv[])
         last_error=fz_error;
         // vel=0;
         
-        if(f_vel>0.1) f_vel=0.1;
-        else if(f_vel<-0.1) f_vel=-0.1;
+        if(f_vel>0.5) f_vel=0.5;
+        else if(f_vel<-0.5) f_vel=-0.5;
 
-        if(w_vel>0.1) w_vel=0.1;
-        else if(w_vel<-0.1) w_vel=-0.1;
+        if(w_vel>0.5) w_vel=0.5;
+        else if(w_vel<-0.5) w_vel=-0.5;
         joint_velocity[3]=w_vel;
         joint_velocity[2]=f_vel;
 
