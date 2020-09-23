@@ -93,6 +93,12 @@ target_link_libraries(gravity_compensate_node
   ${catkin_LIBRARIES}
 )
 
+add_executable(move2init_pose_node src/move2init_pose.cpp)
+target_link_libraries(move2init_pose_node
+  ${catkin_LIBRARIES}
+)
+
+
 
 
 

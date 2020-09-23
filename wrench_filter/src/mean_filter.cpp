@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
     wrench_sum.resize(6);
 
     wrench_pub = nh.advertise<geometry_msgs::WrenchStamped>("/filtered_wrench", 1000);
-    ros::Subscriber wrench_sub = nh.subscribe("/ethdaq_tool", 1000, WrenchsubCallback);
+    ros::Subscriber wrench_sub = nh.subscribe("/ethdaq_data", 1000, WrenchsubCallback);
 
     ros::Duration(1.0).sleep();
     ros::Rate loop_rate(50);
