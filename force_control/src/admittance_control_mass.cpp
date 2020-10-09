@@ -35,7 +35,7 @@ public:
             wrench_base[i]=0;
             actual_vel[i]=0;       
         }
-       
+
         wrench_sub = nh.subscribe("/compensate_wrench_base_filter", 1000, &AdmittanceControlMassDrag::WrenchsubCallback,this);    
         tool_velocity_sub=nh.subscribe("/tool_velocity",1000,&AdmittanceControlMassDrag::ToolVelocitysubCallback,this);
         ur_pub = nh.advertise<std_msgs::String>("ur_driver/URScript",1000);
