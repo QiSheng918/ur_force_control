@@ -13,7 +13,7 @@ std::string combinemsg(std::vector<double> velocity, double acc = 1);
 
 ros::Publisher  ur_script_pub;
 Eigen::Matrix3d rotation_matrix;
-std_msgs::String ur_script_msgs;
+std_msgs::Float64MultiArray pub_msg;
 
 Eigen::Matrix3d getR(double x,double y,double z,double w){
     Eigen::Matrix3d R;
@@ -26,13 +26,13 @@ Eigen::Matrix3d getR(double x,double y,double z,double w){
     R(2,0)=2*(x*z-y*w);
     R(2,1)=2*(y*z+x*w);
     R(2,2)=1-2*x*x-2*y*y;
-    return R;
+    return R.transpose();
   
 }
 
 void VelocityToolsubCallback(const std_msgs::Float64MultiArray &msg)
 {
-    ROS_INFO_STREAM("THE Z IS"<<msg.data[2]);
+    
     std::vector<double> tool_vel(6,0);
     for(int i=0;i<6;i++){
         tool_vel[i]=msg.data[i];
@@ -41,18 +41,18 @@ void VelocityToolsubCallback(const std_msgs::Float64MultiArray &msg)
     std::cout<<vel<<std::endl;
     Eigen::Matrix<double,3,1> base_vel=rotation_matrix*vel;
     for(int i=0;i<3;i++) tool_vel[i]=base_vel[i];
-    ur_script_msgs.data = combinemsg(tool_vel,1);
-    std::cout<<ur_script_msgs.data<<std::endl;
-    ur_script_pub.publish(ur_script_msgs);
+    tool_vel[2]=0;
+    for(int i=0;i<6;i++) pub_msg.data[i]=tool_vel[i];
+    ur_script_pub.publish(pub_msg);
 }
 
 int main(int argc, char *argv[])
 {
-    ros::init(argc, argv, "speedl_test");
+    ros::init(argc, argv, "space2tool_velocity_node");
     ros::NodeHandle nh;
-
-    ur_script_pub = nh.advertise<std_msgs::String>("/ur_driver/URScript", 1000);
-    ros::Subscriber tool_sub = nh.subscribe("/velocity_tool_cmd",1000, VelocityToolsubCallback);
+    pub_msg.data.resize(6);
+    ur_script_pub = nh.advertise<std_msgs::Float64MultiArray>("/velocity_tool_cmd", 1000);
+    ros::Subscriber tool_sub = nh.subscribe("/space2tool_velocity_cmd",1000, VelocityToolsubCallback);
 
     tf::TransformListener listener;
     rotation_matrix=Eigen::Matrix3d::Identity();
@@ -83,31 +83,4 @@ int main(int argc, char *argv[])
         ros::spinOnce();
     }
     return 0;
-}
-
-std::string double2string(double input)
-{
-    std::string string_temp;
-    std::stringstream stream;
-    stream<<input;
-    string_temp = stream.str();
-    return string_temp;
-}
-
-std::string combinemsg(std::vector<double> velocity, double acc)
-{
-    double time2move = 1;
-    std::string move_msg;
-    move_msg = "speedl([";
-    move_msg = move_msg + double2string(velocity[0]) + ",";
-    move_msg = move_msg + double2string(velocity[1]) + ",";
-    move_msg = move_msg + double2string(velocity[2]) + ",";
-    move_msg = move_msg + double2string(velocity[3]) + ",";
-    move_msg = move_msg + double2string(velocity[4]) + ",";
-    move_msg = move_msg + double2string(velocity[5]) + "]";
-    move_msg = move_msg + ",";
-    move_msg = move_msg + double2string(1.5) + ",";
-    move_msg = move_msg + double2string(time2move) + ")";
-    move_msg = move_msg + "\n";
-    return move_msg; 
 }

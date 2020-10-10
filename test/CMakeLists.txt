@@ -123,6 +123,15 @@ target_link_libraries(tool_speedl_test_node
 
 )
 
+add_executable(space2tool_velocity_control_node src/space2tool_velocity_control.cpp)
+target_link_libraries(space2tool_velocity_control_node
+  ${catkin_LIBRARIES}
+  ${EIGEN3_CPP_LIBRARIES}
+
+)
+
+
+
 # add_executable(wrench2tool src/wrench2tool.cpp)
 # target_link_libraries(wrench2tool
 #   ${catkin_LIBRARIES}
