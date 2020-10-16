@@ -66,6 +66,5 @@
         "stdvector": "cpp",
         "core": "cpp",
         "xstring": "cpp"
-    },
-    "python.pythonPath": "/usr/bin/python"
+    }
 }

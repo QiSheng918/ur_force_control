@@ -98,6 +98,11 @@ target_link_libraries(move2init_pose_node
   ${catkin_LIBRARIES}
 )
 
+add_executable(contact_frame_wrench_node src/contact_frame_wrench.cpp)
+target_link_libraries(contact_frame_wrench_node
+  ${catkin_LIBRARIES}
+)
+
 
 
 

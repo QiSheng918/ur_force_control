@@ -1,4 +1,5 @@
 <launch>
    <node pkg="gravity_compensate" type="gravity_compensate_node" name="gravity_compensate_node" output="screen"/>
+   <node pkg="gravity_compensate" type="contact_frame_wrench_node" name="contact_frame_wrench_node" output="screen"/>
    <rosparam file="$(find gravity_compensate)/config/param.yaml" command="load"/>
 </launch>

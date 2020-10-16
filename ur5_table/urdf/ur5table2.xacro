@@ -94,7 +94,7 @@
   <joint name="tool_to_effector" type="fixed">
     <parent link="tool0"/>
     <child link="end_effector"/>
-    <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+    <origin xyz="0 0 0" rpy="1.5708 0 -1.5708"/>
   </joint>
 
 
