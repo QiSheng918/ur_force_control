@@ -1,6 +1,7 @@
 <?xml version="1.0" ?>
 <robot name="ur5table" xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:include filename="$(find ur_description)/urdf/ur5.urdf.xacro" />
+  <xacro:include filename="$(find realsense2_description)/urdf/_d435.urdf.xacro" />
 
   <material name="blue"><!--blue-->
     <color rgba="0.0 0.0 0.8 1.0"/>
@@ -63,4 +64,42 @@
     <child link="base_link"/>
     <origin xyz="0 0 0" rpy="0 0 3.1415926535897932346"/>
   </joint>
+
+
+
+  <link name="end_effector">
+    <visual>
+      <origin
+        xyz="-0.045 0 -0.085"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://ur5_table/meshes/tool.STL" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material
+        name="orange">
+      </material>
+    </visual>
+    <collision>
+      <origin
+         xyz="-0.045 0 -0.085"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://ur5_table/meshes/tool.STL" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="tool_to_effector" type="fixed">
+    <parent link="tool0"/>
+    <child link="end_effector"/>
+    <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+  </joint>
+
+
+    <xacro:sensor_d435 parent="end_effector" name="camera">
+        <origin xyz="0 0.048 -0.085" rpy="0 0 1.5708"/>      
+    </xacro:sensor_d435>
+
 </robot>
