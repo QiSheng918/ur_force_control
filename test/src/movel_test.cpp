@@ -47,60 +47,60 @@ int main(int argc, char *argv[])
     }
 
     ros::Duration(4).sleep(); 
-    ros::Rate loop_rate(2); 
+    ros::Rate loop_rate(25); 
         std_msgs::String ur_script_msgs;
-    for(int i=0;i<2;i++){
-    tf::StampedTransform transform;
-    try{
-      listener.lookupTransform("base", "tool0",  
-                               ros::Time(0), transform);
-    }
-    catch (tf::TransformException ex){
-      ROS_ERROR("%s",ex.what());
-      ros::Duration(1.0).sleep();
-    }
+    for(int i=0;i<25;i++){
+        tf::StampedTransform transform;
+        try{
+        listener.lookupTransform("base", "tool0",  
+                                ros::Time(0), transform);
+        }
+        catch (tf::TransformException ex){
+        ROS_ERROR("%s",ex.what());
+        ros::Duration(1.0).sleep();
+        }
 
-    // initial_pose[0]=transform.getOrigin().getX();
-    // initial_pose[1]=transform.getOrigin().getY();
-    // initial_pose[2]=transform.getOrigin().getZ();
+        // initial_pose[0]=transform.getOrigin().getX();
+        // initial_pose[1]=transform.getOrigin().getY();
+        // initial_pose[2]=transform.getOrigin().getZ();
 
 
-    initial_pose[0]=transform.getOrigin().getX();
-    initial_pose[1]=transform.getOrigin().getY();
-    initial_pose[2]=transform.getOrigin().getZ();
-    double x=transform.getRotation().getX();
-    double y=transform.getRotation().getY();
-    double z=transform.getRotation().getZ();
-    double w=transform.getRotation().getW();
+        initial_pose[0]=transform.getOrigin().getX();
+        initial_pose[1]=transform.getOrigin().getY();
+        initial_pose[2]=transform.getOrigin().getZ();
+        double x=transform.getRotation().getX();
+        double y=transform.getRotation().getY();
+        double z=transform.getRotation().getZ();
+        double w=transform.getRotation().getW();
+        
+
+        Eigen::Matrix3d rotation_matrix=getR(x,y,z,w);
+        double theta=acos((rotation_matrix(0,0)+rotation_matrix(1,1)+rotation_matrix(2,2)-1)/2);
+        double rx=1/(2*sin(theta))*(rotation_matrix(2,1)-rotation_matrix(1,2));
+        double ry=1/(2*sin(theta))*(rotation_matrix(0,2)-rotation_matrix(2,0));
+        double rz=1/(2*sin(theta))*(rotation_matrix(1,0)-rotation_matrix(0,1));
+        // std::cout<<rx*theta<<","<<ry*theta<<","<<rz*theta<<std::endl;
+        
+        initial_pose[3]=rx*theta;
+        initial_pose[4]=ry*theta;
+        initial_pose[5]=rz*theta;
+
+
+
+        
+        
+        
+        for(int i=0;i<6;i++) command_pose[i]=initial_pose[i];
+        command_pose[2]=initial_pose[2];
+        command_pose[2]+=0.01;
+        for(int i=0;i<6;i++) std::cout<<command_pose[i]<<","; 
+        std::cout<<std::endl;
     
 
-    Eigen::Matrix3d rotation_matrix=getR(x,y,z,w);
-    double theta=acos((rotation_matrix(0,0)+rotation_matrix(1,1)+rotation_matrix(2,2)-1)/2);
-    double rx=1/(2*sin(theta))*(rotation_matrix(2,1)-rotation_matrix(1,2));
-    double ry=1/(2*sin(theta))*(rotation_matrix(0,2)-rotation_matrix(2,0));
-    double rz=1/(2*sin(theta))*(rotation_matrix(1,0)-rotation_matrix(0,1));
-    // std::cout<<rx*theta<<","<<ry*theta<<","<<rz*theta<<std::endl;
-    
-    initial_pose[3]=rx*theta;
-    initial_pose[4]=ry*theta;
-    initial_pose[5]=rz*theta;
-
-
-
-    
-    
-    
-    for(int i=0;i<6;i++) command_pose[i]=initial_pose[i];
-    command_pose[2]=initial_pose[2];
-    command_pose[2]+=0.1;
-    for(int i=0;i<6;i++) std::cout<<command_pose[i]<<","; 
-    std::cout<<std::endl;
-   
-
-    ur_script_msgs.data = combinemsg(command_pose,0.5);
-    std::cout<<ur_script_msgs.data<<std::endl;
-    ur_script_pub.publish(ur_script_msgs);
-    loop_rate.sleep();
+        ur_script_msgs.data = combinemsg(command_pose,0.5);
+        std::cout<<ur_script_msgs.data<<std::endl;
+        ur_script_pub.publish(ur_script_msgs);
+        loop_rate.sleep();
     }
     ros::Duration(1).sleep();
 

@@ -130,6 +130,14 @@ target_link_libraries(space2tool_velocity_control_node
 
 )
 
+add_executable(tf_get2point_node src/tf_get2point.cpp)
+target_link_libraries(tf_get2point_node
+  ${catkin_LIBRARIES}
+  ${EIGEN3_CPP_LIBRARIES}
+
+)
+
+
 
 
 # add_executable(wrench2tool src/wrench2tool.cpp)
