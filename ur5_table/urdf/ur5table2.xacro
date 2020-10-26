@@ -91,6 +91,8 @@
     </collision>
   </link>
 
+  
+
   <joint name="tool_to_effector" type="fixed">
     <parent link="tool0"/>
     <child link="end_effector"/>
@@ -98,8 +100,16 @@
   </joint>
 
 
-    <xacro:sensor_d435 parent="end_effector" name="camera">
-        <origin xyz="0 0.048 -0.085" rpy="0 0 1.5708"/>      
-    </xacro:sensor_d435>
+  <xacro:sensor_d435 parent="end_effector" name="realsense_camera">
+      <origin xyz="0 0.048 -0.085" rpy="0 0 1.5708"/>      
+  </xacro:sensor_d435>
+
+
+  <link name="contact_frame"/>
+  <joint name="contact_fixed_joint" type="fixed">
+    <parent link="tool0"/>
+    <child link="contact_frame"/>
+    <origin xyz="0 0 0.122" rpy="0 0 0"/>
+  </joint>
 
 </robot>

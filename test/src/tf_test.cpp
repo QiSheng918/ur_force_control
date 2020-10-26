@@ -44,7 +44,7 @@ int main(int argc, char** argv){
   while (node.ok()){
     tf::StampedTransform transform;
     try{
-      listener.lookupTransform("base", "tool0",  
+      listener.lookupTransform("tool0", "camera_color_optical_frame",  
                                ros::Time(0), transform);
     }
     catch (tf::TransformException ex){

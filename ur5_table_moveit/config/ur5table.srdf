@@ -141,25 +141,33 @@
         <joint name="wrist_2_joint" value="-1.588" />
         <joint name="wrist_3_joint" value="0.8976" />
     </group_state>
+    <group_state name="vision_pose" group="manipulator">
+        <joint name="elbow_joint" value="0.94" />
+        <joint name="shoulder_lift_joint" value="-1.57" />
+        <joint name="shoulder_pan_joint" value="-0.3" />
+        <joint name="wrist_1_joint" value="-0.935" />
+        <joint name="wrist_2_joint" value="-1.56" />
+        <joint name="wrist_3_joint" value="-1.73" />
+    </group_state>
     <!--VIRTUAL JOINT: Purpose: this element defines a virtual joint between a robot link and an external frame of reference (considered fixed with respect to the robot)-->
     <virtual_joint name="fixed_base" type="fixed" parent_frame="world" child_link="world" />
     <!--DISABLE COLLISIONS: By default it is assumed that any link of the robot could potentially come into collision with any other link in the robot. This tag disables collision checking between a specified pair of links. -->
     <disable_collisions link1="base_link" link2="shoulder_link" reason="Adjacent" />
     <disable_collisions link1="base_link" link2="table" reason="Adjacent" />
-    <disable_collisions link1="camera_link" link2="ee_link" reason="Never" />
-    <disable_collisions link1="camera_link" link2="end_effector" reason="Adjacent" />
-    <disable_collisions link1="camera_link" link2="wrist_1_link" reason="Never" />
-    <disable_collisions link1="camera_link" link2="wrist_2_link" reason="Never" />
-    <disable_collisions link1="camera_link" link2="wrist_3_link" reason="Never" />
     <disable_collisions link1="ee_link" link2="end_effector" reason="Never" />
+    <disable_collisions link1="ee_link" link2="realsense_camera_link" reason="Never" />
     <disable_collisions link1="ee_link" link2="wrist_1_link" reason="Never" />
     <disable_collisions link1="ee_link" link2="wrist_2_link" reason="Never" />
     <disable_collisions link1="ee_link" link2="wrist_3_link" reason="Adjacent" />
+    <disable_collisions link1="end_effector" link2="realsense_camera_link" reason="Adjacent" />
     <disable_collisions link1="end_effector" link2="wrist_1_link" reason="Never" />
     <disable_collisions link1="end_effector" link2="wrist_2_link" reason="Never" />
     <disable_collisions link1="end_effector" link2="wrist_3_link" reason="Adjacent" />
     <disable_collisions link1="forearm_link" link2="upper_arm_link" reason="Adjacent" />
     <disable_collisions link1="forearm_link" link2="wrist_1_link" reason="Adjacent" />
+    <disable_collisions link1="realsense_camera_link" link2="wrist_1_link" reason="Never" />
+    <disable_collisions link1="realsense_camera_link" link2="wrist_2_link" reason="Never" />
+    <disable_collisions link1="realsense_camera_link" link2="wrist_3_link" reason="Never" />
     <disable_collisions link1="shoulder_link" link2="table" reason="Never" />
     <disable_collisions link1="shoulder_link" link2="upper_arm_link" reason="Adjacent" />
     <disable_collisions link1="wrist_1_link" link2="wrist_2_link" reason="Adjacent" />

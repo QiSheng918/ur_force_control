@@ -57,12 +57,17 @@ int main(int argc, char** argv){
     }
     tf::Matrix3x3 R(transform.getRotation());
 
- 
-    double roll,pitch,yaw;
-    R.getRPY(roll,pitch,yaw);
+ 	double _x=transform.getRotation().getX();
+	double _y=transform.getRotation().getY();
+	double _z=transform.getRotation().getZ();
+	double _w=transform.getRotation().getW();
+	Eigen::Quaterniond q(_w,_x,_y,_z);
+	Eigen::Vector3d eulerAngle=q.matrix().eulerAngles(2,1,0);
+    // double roll,pitch,yaw;
+    // R.getRPY(roll,pitch,yaw);
 	if(flag){
 		std::cout<<"the position is: "<<transform.getOrigin().getX()<<","<<transform.getOrigin().getY()<<","<<transform.getOrigin().getZ()<<std::endl;
-		std::cout<<"the RPY is:"<<roll<<","<<pitch<<","<<yaw<<std::endl;
+		std::cout<<"the q is:"<<_x<<","<<_y<<","<<_z<<","<<_w<<std::endl;
 	}
 	flag=false;
     rate.sleep();
