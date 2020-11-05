@@ -28,7 +28,7 @@ use UR5 and optoforce hex-e to realize admittance control
 * open a terminal and run `roslaunch wrench_filter wrench.launch`
 
 * open a terminal and run  `roslaunch ur5_table_moveit ur5_moveit_planning_execution.launch`
-
+* open a termianl and run `rosrun gravity_compensate gravity_identify_node`(if you want to recalibrate the end_effector)
 * open a terminal and run  `roslaunch gravity_compensate  gravity_identify.launch`
 
 * open a terminal and run `rosrun force_control admittance_control_node`
