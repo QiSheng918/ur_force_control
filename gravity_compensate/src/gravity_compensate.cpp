@@ -42,6 +42,8 @@ public:
         origin_wrench_sub = nh.subscribe("/filtered_wrench", 1000, &GravityCompensate::WrenchsubCallback,this);
         wrench_tool_pub = nh.advertise<geometry_msgs::WrenchStamped>("/compensate_wrench_tool",1000);
         wrench_base_pub = nh.advertise<geometry_msgs::WrenchStamped>("/compensate_wrench_base",1000);
+        // wrench_base_pub = nh.advertise<geometry_msgs::WrenchStamped>("/compensate_wrench_base",1000);
+
         ROS_INFO("init finished");
         ros::Duration(1).sleep();
     }

@@ -44,7 +44,7 @@ int main(int argc, char** argv){
   while (node.ok()){
     tf::StampedTransform transform;
     try{
-      listener.lookupTransform("tool0", "camera_color_optical_frame",  
+      listener.lookupTransform("base", "tool0",  
                                ros::Time(0), transform);
     }
     catch (tf::TransformException ex){
@@ -64,6 +64,7 @@ int main(int argc, char** argv){
     // std::cout<<"the rotation matrix is:\n"<<getR(x,y,z,w)<<std::endl;
     // tf
     Eigen::Matrix3d rotation_matrix=getR(x,y,z,w);
+    std::cout<<rotation_matrix<<std::endl;
     double theta=acos((rotation_matrix(0,0)+rotation_matrix(1,1)+rotation_matrix(2,2)-1)/2);
     double rx=1/(2*sin(theta))*(rotation_matrix(2,1)-rotation_matrix(1,2));
     double ry=1/(2*sin(theta))*(rotation_matrix(0,2)-rotation_matrix(2,0));

@@ -22,6 +22,8 @@ find_package(catkin REQUIRED COMPONENTS
 # find_package(Boost REQUIRED COMPONENTS system)
 find_package(Eigen3 REQUIRED)
 
+find_package(orocos_kdl REQUIRED)
+
 find_package(yaml-cpp REQUIRED)
 
 
@@ -43,6 +45,7 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIRS}
   ${YAML_CPP_LIBRARIES}
+  ${orocos_kdl_INCLUDE_DIRS}
 )
 
 
@@ -135,6 +138,28 @@ target_link_libraries(tf_get2point_node
   ${catkin_LIBRARIES}
   ${EIGEN3_CPP_LIBRARIES}
 
+)
+
+add_executable(axies_test_node src/axies_test.cpp)
+target_link_libraries(axies_test_node
+  ${catkin_LIBRARIES}
+  ${EIGEN3_CPP_LIBRARIES}
+
+)
+
+add_executable(force_normal_calculate_test_node src/force_normal_calculate_test.cpp)
+target_link_libraries(force_normal_calculate_test_node
+  ${catkin_LIBRARIES}
+  ${EIGEN3_CPP_LIBRARIES}
+
+)
+
+add_executable(kdl_intercept_test_node src/kdl_intercept_test.cpp)
+target_link_libraries(kdl_intercept_test_node
+  ${catkin_LIBRARIES}
+  ${EIGEN3_CPP_LIBRARIES}
+  ${orocos_kdl_CPP_LIBRARIES}
+  
 )
 
 

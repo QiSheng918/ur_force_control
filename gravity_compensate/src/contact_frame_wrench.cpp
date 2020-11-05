@@ -8,7 +8,7 @@ ros::Publisher wrench_pub;
 
 std::vector<std::vector<double> > wrench;
 std::vector<double> wrench_sum;
-const double z=0.087;
+const double z=0.089;
 
 void WrenchsubCallback(const geometry_msgs::WrenchStamped& msg)
 {
