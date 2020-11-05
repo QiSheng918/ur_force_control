@@ -10,7 +10,7 @@ use UR5 and optoforce hex-e to realize admittance control
 
 * *gravity_compensate* is the package to perform gravity_compensate. Use least squares to identify parameters of end effector and eliminate the influence of end effector because of gravity
 
-* *test* is the package of test someting like yaml_file write or poe method to get robot pose
+* *ur_control_test* is the package of test someting like yaml_file write or poe method to get robot pose
 
 * *ur_modern_driver* is the ros driver package of ur robot
 

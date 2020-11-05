@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>test</name>
+  <name>ur_control_test</name>
   <version>0.0.0</version>
   <description>The gravity_con package</description>
 
