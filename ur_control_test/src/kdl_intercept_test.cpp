@@ -41,6 +41,9 @@ int main(int argc,char* argv[]) {
 		path->Add(Frame(Rotation::RPY(0,0.7,0), Vector(1.5,0.3,0)));
 		path->Add(Frame(Rotation::RPY(0.7,0.7,0), Vector(1,1,0)));
 
+		path->Add(Frame(Rotation::RPY(0.7,0.7,0), Vector(1,1,0)));
+
+
 		// always call Finish() at the end, otherwise the last segment will not be added.
 		path->Finish();
 

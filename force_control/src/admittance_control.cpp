@@ -41,9 +41,9 @@ public:
             for(int i=0;i<3;i++){
                 command_vel[i]=linear_damp*this->wrench_base[i];
             }
-            for(int i=3;i<6;i++){
-                command_vel[i]=angular_damp*this->wrench_base[i];
-            }
+            // for(int i=3;i<6;i++){
+            //     command_vel[i]=angular_damp*this->wrench_base[i];
+            // }
             urMove();
             for(int i=0;i<6;i++) std::cout<<command_vel[i]<<"#   ";
             std::cout<<std::endl;

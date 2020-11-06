@@ -134,3 +134,10 @@ target_link_libraries(hybrid_postion_force_tool_node
   ${EIGEN3_LIBRARIES}
 )
 
+
+add_executable(admittance_control_of_ur_node src/admittance_control_of_ur.cpp)
+target_link_libraries(admittance_control_of_ur_node
+  ${catkin_LIBRARIES}
+  ${EIGEN3_LIBRARIES}
+)
+
