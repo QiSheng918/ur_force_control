@@ -56,10 +56,10 @@ include_directories(
 
 
 
-# add_executable(tf_test src/tf_test.cpp)
-# target_link_libraries(tf_test
-#   ${catkin_LIBRARIES}
-# )
+add_executable(tf_test src/tf_test.cpp)
+target_link_libraries(tf_test
+  ${catkin_LIBRARIES}
+)
 
 # add_executable(mean_filter src/mean_filter.cpp)
 # target_link_libraries(mean_filter
@@ -145,6 +145,14 @@ include_directories(
 
 add_executable(kdl_intercept_test_node src/kdl_intercept_test.cpp)
 target_link_libraries(kdl_intercept_test_node
+  ${catkin_LIBRARIES}
+  ${EIGEN3_CPP_LIBRARIES}
+  ${orocos_kdl_CPP_LIBRARIES}
+  
+)
+
+add_executable(intercept_test_node src/intercept_test.cpp)
+target_link_libraries(intercept_test_node
   ${catkin_LIBRARIES}
   ${EIGEN3_CPP_LIBRARIES}
   ${orocos_kdl_CPP_LIBRARIES}

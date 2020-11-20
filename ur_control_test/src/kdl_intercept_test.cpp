@@ -35,13 +35,12 @@ int main(int argc,char* argv[]) {
 		// If you need to rotate over a larger angle, you need to introduce intermediate points.
 		// So, there is a common use case for using parallel segments.
 		path->Add(Frame(Rotation::RPY(PI,0,0), Vector(-1,0,0)));
-		path->Add(Frame(Rotation::RPY(PI_2,0,0), Vector(-0.5,0,0)));
-		path->Add(Frame(Rotation::RPY(0,0,0), Vector(0,0,0)));
-		path->Add(Frame(Rotation::RPY(0.7,0.7,0.7), Vector(1,1,1)));
-		path->Add(Frame(Rotation::RPY(0,0.7,0), Vector(1.5,0.3,0)));
-		path->Add(Frame(Rotation::RPY(0.7,0.7,0), Vector(1,1,0)));
+		path->Add(Frame(Rotation::RPY(PI/2,0,0), Vector(-0.5,0,0)));
+		// path->Add(Frame(Rotation::RPY(0,0,0), Vector(0,0,0)));
+		// path->Add(Frame(Rotation::RPY(0.7,0.7,0.7), Vector(1,1,1)));
+		// path->Add(Frame(Rotation::RPY(0,0.7,0), Vector(1.5,0.3,0)));
+		// path->Add(Frame(Rotation::RPY(0.7,0.7,0), Vector(1,1,0)));
 
-		path->Add(Frame(Rotation::RPY(0.7,0.7,0), Vector(1,1,0)));
 
 
 		// always call Finish() at the end, otherwise the last segment will not be added.
@@ -54,9 +53,9 @@ int main(int argc,char* argv[]) {
 		Trajectory* traject = new Trajectory_Segment(path, velpref);
 
 
-		Trajectory_Composite* ctraject = new Trajectory_Composite();
-		ctraject->Add(traject);
-		ctraject->Add(new Trajectory_Stationary(1.0,Frame(Rotation::RPY(0.7,0.7,0), Vector(1,1,0))));
+		// Trajectory_Composite* ctraject = new Trajectory_Composite();
+		// ctraject->Add(traject);
+		// ctraject->Add(new Trajectory_Stationary(1.0,Frame(Rotation::RPY(0.7,0.7,0), Vector(1,1,0))));
 
 		// use the trajectory
 		double dt=0.1;
@@ -70,6 +69,11 @@ int main(int argc,char* argv[]) {
 				for (int j=0;j<4;++j)
 					of << current_pose(i,j) << "\t";
 			of << "\n";
+			for(int i=0;i<3;i++){
+				of << current_vel.rot.data[i]<<"\t";
+			}
+			of << "\n";
+			of << "\n";
 			// also velocities and accelerations are available !
 			//traject->Vel(t);
 			//traject->Acc(t);
@@ -77,33 +81,33 @@ int main(int argc,char* argv[]) {
 		of.close();
 
 		// you can get some meta-info on the path:
-		for (int segmentnr=0;  segmentnr < path->GetNrOfSegments(); segmentnr++) {
-			double starts,ends;
-			Path::IdentifierType pathtype;
-			if (segmentnr==0) {
-				starts = 0.0;
-			} else {
-				starts = path->GetLengthToEndOfSegment(segmentnr-1);
-			}
-			ends = path->GetLengthToEndOfSegment(segmentnr);
-			pathtype = path->GetSegment(segmentnr)->getIdentifier();
-			std::cout << "segment " << segmentnr << " runs from s="<<starts << " to s=" <<ends;
-			switch(pathtype) {
-				case Path::ID_CIRCLE:
-					std::cout << " circle";
-					break;
-				case Path::ID_LINE:
-					std::cout << " line ";
-					break;
-				default:
-					std::cout << " unknown ";
-					break;
-			}
-			std::cout << std::endl;
-		}
-        std::cout << " trajectory written to the ./trajectory.dat file " << std::endl;
+		// for (int segmentnr=0;  segmentnr < path->GetNrOfSegments(); segmentnr++) {
+		// 	double starts,ends;
+		// 	Path::IdentifierType pathtype;
+		// 	if (segmentnr==0) {
+		// 		starts = 0.0;
+		// 	} else {
+		// 		starts = path->GetLengthToEndOfSegment(segmentnr-1);
+		// 	}
+		// 	ends = path->GetLengthToEndOfSegment(segmentnr);
+		// 	pathtype = path->GetSegment(segmentnr)->getIdentifier();
+		// 	std::cout << "segment " << segmentnr << " runs from s="<<starts << " to s=" <<ends;
+		// 	switch(pathtype) {
+		// 		case Path::ID_CIRCLE:
+		// 			std::cout << " circle";
+		// 			break;
+		// 		case Path::ID_LINE:
+		// 			std::cout << " line ";
+		// 			break;
+		// 		default:
+		// 			std::cout << " unknown ";
+		// 			break;
+		// 	}
+		// 	std::cout << std::endl;
+		// }
+        // std::cout << " trajectory written to the ./trajectory.dat file " << std::endl;
 
-        delete ctraject;
+        // delete ctraject;
 	} catch(Error& error) {
 		std::cout <<"I encountered this error : " << error.Description() << std::endl;
 		std::cout << "with the following type " << error.GetType() << std::endl;

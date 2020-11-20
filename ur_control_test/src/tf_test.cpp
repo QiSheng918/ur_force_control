@@ -40,7 +40,7 @@ int main(int argc, char** argv){
 
   tf::TransformListener listener;
 
-  ros::Rate rate(10.0);
+  ros::Rate rate(50.0);
   while (node.ok()){
     tf::StampedTransform transform;
     try{
@@ -64,15 +64,15 @@ int main(int argc, char** argv){
     // std::cout<<"the rotation matrix is:\n"<<getR(x,y,z,w)<<std::endl;
     // tf
     Eigen::Matrix3d rotation_matrix=getR(x,y,z,w);
-    std::cout<<rotation_matrix<<std::endl;
+    // std::cout<<rotation_matrix<<std::endl;
     double theta=acos((rotation_matrix(0,0)+rotation_matrix(1,1)+rotation_matrix(2,2)-1)/2);
     double rx=1/(2*sin(theta))*(rotation_matrix(2,1)-rotation_matrix(1,2));
     double ry=1/(2*sin(theta))*(rotation_matrix(0,2)-rotation_matrix(2,0));
     double rz=1/(2*sin(theta))*(rotation_matrix(1,0)-rotation_matrix(0,1));
-    std::cout<<rx*theta<<","<<ry*theta<<","<<rz*theta<<std::endl;
+    // std::cout<<rx*theta<<","<<ry*theta<<","<<rz*theta<<std::endl;
     double roll,pitch,yaw;
     R.getRPY(roll,pitch,yaw);
-    std::cout<<"the RPY is:"<<roll<<","<<pitch<<","<<yaw<<std::endl;
+    // std::cout<<"the RPY is:"<<roll<<","<<pitch<<","<<yaw<<std::endl;
     // std::cout<<roll<<","<<pitch<<","<<yaw<<std::endl;
     quaternion2RPY(x,y,z,w);
     rate.sleep();
