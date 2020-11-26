@@ -43,20 +43,11 @@ int main(int argc, char *argv[])
     ros::NodeHandle nh;
 
     flag=0;
-    std::vector<double> temp(frequency,0);
-    for(int i=0;i<6;i++) wrench.push_back(temp);
-    wrench_sum.resize(6);
+    wrench.resize(6,std::vector<double>(frequency,0));
+    wrench_sum.resize(6,0);
 
     wrench_pub = nh.advertise<geometry_msgs::WrenchStamped>("/filtered_wrench", 1000);
     ros::Subscriber wrench_sub = nh.subscribe("/ethdaq_data", 1000, WrenchsubCallback);
-
-    ros::Duration(1.0).sleep();
-    ros::Rate loop_rate(50);
-    while (ros::ok())
-    {
-        ros::spinOnce();
-        loop_rate.sleep();
-    }
-    ros::waitForShutdown();
+    ros::spin();
     return 0;
 }

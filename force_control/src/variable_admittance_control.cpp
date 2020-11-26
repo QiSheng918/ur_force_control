@@ -22,19 +22,12 @@ class VariableAdmittanceControl
 public:
     VariableAdmittanceControl()
     {
-        command_vel.resize(6);
-        actual_vel.resize(6);
-        wrench_base.resize(6);
-        actual_pos.resize(6);
-        command_pos.resize(6);
-        for(int i = 0; i < 6; i ++)
-        {   
-            command_vel[i]=0;
-            actual_vel[i]=0;
-            wrench_base[i]=0;
-            actual_pos[i]=0;
-            command_pos[i]=0;
-        }
+        command_vel.resize(6,0);
+        actual_vel.resize(6,0);
+        wrench_base.resize(6,0);
+        actual_pos.resize(6,0);
+        command_pos.resize(6,0);
+       
 
         phi=0;
         last_fz=0;
@@ -73,13 +66,11 @@ public:
         actual_pos[4]=ry*theta;
         actual_pos[5]=rz*theta;
         for(int i=0;i<6;i++){
-            command_pos[i]=actual_pos[i];
-            
+            command_pos[i]=actual_pos[i];     
         }
         command_pos[2]-=0.01;
         this->urMoveL(command_pos);
         ros::Duration(1.0).sleep();
-
 
         int loop_flag=0;
         int direction_flag=0;
@@ -90,10 +81,6 @@ public:
         ros::Rate loop_rate(50);
         while (ros::ok())
         {   
-            
-
-            
-
             double actual_fz=this->wrench_base[2];
             double vel_now=actual_vel[2];
             double error=actual_fz-desire_fz;
@@ -183,8 +170,6 @@ private:
 void VariableAdmittanceControl::limitVelocity(std::vector<double> &velocity){
     // std::cout<<"limit velocity"<<std::endl;
     for(int i=0;i<velocity.size();i++){
-        // std::cout<<velocity[i]
-        // std::cout<<fabs(velocity[i])<<std::endl;
         if(fabs(velocity[i])<1e-4) velocity[i]=0;
         else if(velocity[i]>1) velocity[i]=1;
         else if(velocity[i]<-1) velocity[i]=-1;
@@ -213,7 +198,6 @@ void VariableAdmittanceControl::ToolVelocitysubCallback(const geometry_msgs::Twi
     actual_vel[4]=msg.twist.angular.y;
     actual_vel[5]=msg.twist.angular.z;
 }
-
 
 // 四元数转旋转矩阵
 Eigen::Matrix3d VariableAdmittanceControl::quaternion2Rotation(double x,double y,double z,double w){
@@ -290,8 +274,6 @@ void VariableAdmittanceControl::urMove()
 //UR机器人运动函数
 void VariableAdmittanceControl::urMoveL(std::vector<double> &command_pose)
 {
-
-
     std_msgs::String ur_script_msgs;
     double time2move = 0.1;
     double acc=2;
@@ -309,27 +291,14 @@ void VariableAdmittanceControl::urMoveL(std::vector<double> &command_pose)
 
     move_msg = move_msg + "\n";
 
-    // move_msg = "movel(p[";
-    // move_msg = move_msg + double2string(command_pose[0]) + ",";
-    // move_msg = move_msg + double2string(command_pose[1]) + ",";
-    // move_msg = move_msg + double2string(command_pose[2]) + ",";
-    // move_msg = move_msg + double2string(command_pose[3]) + ",";
-    // move_msg = move_msg + double2string(command_pose[4]) + ",";
-    // move_msg = move_msg + double2string(command_pose[5]) + "]";
-    // move_msg = move_msg + ",";
-    // move_msg = move_msg + double2string(1) + ",";
-    // move_msg = move_msg + double2string(0.5) + ",";
-    // move_msg = move_msg + double2string(1) + ")";
-    // move_msg = move_msg + "\n";
     ur_script_msgs.data=move_msg;
-    // ROS_INFO_STREAM("the command pose is:"<<ur_script_msgs.data);
     ur_pub.publish(ur_script_msgs);
 }
 
 
 int main(int argc, char *argv[])
 {
-    ros::init(argc, argv, "fixed_point_admittance_control");
+    ros::init(argc, argv, "variable_admittance_control_node");
     ros::AsyncSpinner spinner(2);
     spinner.start();
     VariableAdmittanceControl ad;

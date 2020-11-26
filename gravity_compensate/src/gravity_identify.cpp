@@ -1,21 +1,26 @@
-#include "ros/ros.h"
-#include "geometry_msgs/WrenchStamped.h"
-#include "std_msgs/String.h"
-#include "Eigen/Eigen"
-#include "Eigen/Geometry"
-#include "Eigen/Core"
-#include "cmath"
-#include "std_msgs/Float64.h"
-#include "Eigen/Dense"
-#include "string.h"
-#include "sensor_msgs/JointState.h"
+#include <iostream>
+#include <string>
+#include <fstream>
+
+#include <ros/ros.h>
+#include <ros/package.h>
+#include <geometry_msgs/WrenchStamped.h>
+#include <std_msgs/String.h>
+#include <std_msgs/Float64.h>
+#include <sensor_msgs/JointState.h>
 #include <moveit/move_group_interface/move_group_interface.h>
 #include <tf/transform_listener.h>
-#include <yaml-cpp/yaml.h>
-#include <fstream>
-#include <ros/package.h>
+#include <cmath>
 
-static const std::string PLANNING_GROUP = "manipulator";
+#include <yaml-cpp/yaml.h>
+
+#include <Eigen/Dense>
+#include <Eigen/Eigen>
+#include <Eigen/Geometry>
+#include <Eigen/Core>
+
+
+const std::string PLANNING_GROUP = "manipulator";
 const int pos_num=9;
 
 class GravityIdentify
@@ -23,12 +28,10 @@ class GravityIdentify
 public:
     GravityIdentify():move_group(PLANNING_GROUP)
     {
-        wrenchb_temp.resize(6);  
+        wrenchb_temp.resize(6,0);  
         index=0;
         sensor_point=0;
-        for(int i=0;i<6;i++){
-            wrenchb_temp[i]=0;
-        }
+
         flag=false;
         wrench_sub = nh.subscribe("/filtered_wrench", 1000, &GravityIdentify::WrenchsubCallback,this);
        
@@ -76,7 +79,7 @@ private:
     void calculateP();
     void calculateG();
     int urMove();
-    void writeToYaml();
+    void writeToYaml() const;
 };
 
 //四元数转旋转矩阵
@@ -132,20 +135,18 @@ void GravityIdentify::getSE3(){
     std::cout<<"calculate R started"<<std::endl;
     tf::StampedTransform transform;
     try{
-      listener.lookupTransform("base", "tool0",  
-                               ros::Time(0), transform);
+        listener.lookupTransform("base", "tool0",ros::Time(0), transform);
     }
     catch (tf::TransformException ex){
-      ROS_ERROR("%s",ex.what());
-      ros::Duration(1.0).sleep();
+        ROS_ERROR("%s",ex.what());
+        ros::Duration(1.0).sleep();
     }
-    // ROS_INFO("U are here 0");
+
     double x=transform.getRotation().getX();
     double y=transform.getRotation().getY();
     double z=transform.getRotation().getZ();
     double w=transform.getRotation().getW();
 
-    // ROS_INFO("U are here 1");
     R.block(3*index,0,3,3)=quaternion2Rotation(x,y,z,w).transpose();
     std::cout<<"calculate R finished"<<std::endl;
 }
@@ -206,7 +207,7 @@ int GravityIdentify::urMove()
 }
 
 //将标识出的参数写入yaml文件
-void GravityIdentify::writeToYaml()
+void GravityIdentify::writeToYaml() const
 {
     std::string dir_package,dir_param_file;
     dir_package = ros::package::getPath("gravity_compensate");

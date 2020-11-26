@@ -60,11 +60,6 @@ int main(int argc, char *argv[])
         ros::Duration(1.0).sleep();
         }
 
-        // initial_pose[0]=transform.getOrigin().getX();
-        // initial_pose[1]=transform.getOrigin().getY();
-        // initial_pose[2]=transform.getOrigin().getZ();
-
-
         initial_pose[0]=transform.getOrigin().getX();
         initial_pose[1]=transform.getOrigin().getY();
         initial_pose[2]=transform.getOrigin().getZ();
@@ -79,17 +74,11 @@ int main(int argc, char *argv[])
         double rx=1/(2*sin(theta))*(rotation_matrix(2,1)-rotation_matrix(1,2));
         double ry=1/(2*sin(theta))*(rotation_matrix(0,2)-rotation_matrix(2,0));
         double rz=1/(2*sin(theta))*(rotation_matrix(1,0)-rotation_matrix(0,1));
-        // std::cout<<rx*theta<<","<<ry*theta<<","<<rz*theta<<std::endl;
         
         initial_pose[3]=rx*theta;
         initial_pose[4]=ry*theta;
         initial_pose[5]=rz*theta;
 
-
-
-        
-        
-        
         for(int i=0;i<6;i++) command_pose[i]=initial_pose[i];
         command_pose[2]=initial_pose[2];
         command_pose[2]+=0.01;
@@ -103,8 +92,6 @@ int main(int argc, char *argv[])
         loop_rate.sleep();
     }
     ros::Duration(1).sleep();
-
-
     std::string move_msg="stopl(1)\n";
     ur_script_msgs.data = move_msg;
     ur_script_pub.publish(ur_script_msgs);

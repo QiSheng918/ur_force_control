@@ -56,10 +56,6 @@ public:
         ros::Rate loop_rate(100);
         while (ros::ok())
         {   
-            
-
-            
-
             double actual_fz=this->wrench_base[2];
             double vel_now=actual_vel[2];
             double error=actual_fz-desire_fz;

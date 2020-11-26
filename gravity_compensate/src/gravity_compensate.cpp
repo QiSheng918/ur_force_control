@@ -1,19 +1,22 @@
-#include "ros/ros.h"
-#include "geometry_msgs/WrenchStamped.h"
-#include "std_msgs/String.h"
-#include "Eigen/Eigen"
-#include "Eigen/Geometry"
-#include "Eigen/Core"
-#include "cmath"
-#include "std_msgs/Float64.h"
-#include "Eigen/Dense"
-#include "string.h"
-#include "sensor_msgs/JointState.h"
+#include <iostream>
+#include <string>
+#include <cmath>
+
+#include <ros/ros.h>
+#include <ros/package.h>
+#include <geometry_msgs/WrenchStamped.h>
+#include <std_msgs/String.h>
+#include <std_msgs/Float64.h>
+#include <sensor_msgs/JointState.h>
 #include <moveit/move_group_interface/move_group_interface.h>
-// #include <moveit/planning_scene_interface/planning_scene_interface.h>
 #include <tf/transform_listener.h>
 
-static const std::string PLANNING_GROUP = "manipulator";
+#include <Eigen/Dense>
+#include <Eigen/Eigen>
+#include <Eigen/Geometry>
+#include <Eigen/Core>
+
+const std::string PLANNING_GROUP = "manipulator";
 const int pos_num=6;
 class GravityCompensate
 {
@@ -37,8 +40,6 @@ public:
         }
         F0<<temp[0],temp[1],temp[2],temp[3],temp[4],temp[5];
 
- 
-
         origin_wrench_sub = nh.subscribe("/filtered_wrench", 1000, &GravityCompensate::WrenchsubCallback,this);
         wrench_tool_pub = nh.advertise<geometry_msgs::WrenchStamped>("/compensate_wrench_tool",1000);
         wrench_base_pub = nh.advertise<geometry_msgs::WrenchStamped>("/compensate_wrench_base",1000);
@@ -58,8 +59,6 @@ private:
     Eigen::Matrix<double,3,1> G0;
     Eigen::Matrix<double,6,1> F0;
     tf::TransformListener listener;
-  
-    
 
     void WrenchsubCallback(const geometry_msgs::WrenchStamped& msg);   
     Eigen::Matrix3d getSO3();
@@ -142,20 +141,17 @@ Eigen::Matrix<double,3,3> GravityCompensate::getSO3(){
     std::cout<<"calculate R started"<<std::endl;
     tf::StampedTransform transform;
     try{
-      listener.lookupTransform("base", "tool0",  
-                               ros::Time(0), transform);
+        listener.lookupTransform("base", "tool0", ros::Time(0), transform);
     }
     catch (tf::TransformException ex){
-      ROS_ERROR("%s",ex.what());
-      ros::Duration(1.0).sleep();
+        ROS_ERROR("%s",ex.what());
+        ros::Duration(1.0).sleep();
     }
-    // ROS_INFO("U are here 0");
     double x=transform.getRotation().getX();
     double y=transform.getRotation().getY();
     double z=transform.getRotation().getZ();
     double w=transform.getRotation().getW();
 
-    // ROS_INFO("U are here");
     return quaternion2Rotation(x,y,z,w);
 
 }

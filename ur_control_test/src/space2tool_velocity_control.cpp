@@ -34,11 +34,9 @@ void VelocityToolsubCallback(const std_msgs::Float64MultiArray &msg)
 {
     
     std::vector<double> tool_vel(6,0);
-    for(int i=0;i<6;i++){
-        tool_vel[i]=msg.data[i];
-    }
+    for(int i=0;i<6;i++) tool_vel[i]=msg.data[i];
+ 
     Eigen::Matrix<double,3,1> vel{tool_vel[0],tool_vel[1],tool_vel[2]};
-    std::cout<<vel<<std::endl;
     Eigen::Matrix<double,3,1> base_vel=rotation_matrix*vel;
     for(int i=0;i<3;i++) tool_vel[i]=base_vel[i];
     tool_vel[2]=0;
@@ -59,8 +57,6 @@ int main(int argc, char *argv[])
     ros::Duration(1.0).sleep();
 
     ros::Rate rate(250.0);
-    // ros::Time last_time=ros::Time::now();
-    // ros::Time time_now;
     while (ros::ok()){
         tf::StampedTransform transform;
         try{
@@ -70,17 +66,16 @@ int main(int argc, char *argv[])
             ROS_ERROR("%s",ex.what());
             ros::Duration(1.0).sleep();
         }
-        // time_now=ros::Time::now();
-        // std::cout<<(time_now-last_time).toSec()<<std::endl;
-        // last_time=time_now;
+
         double x=transform.getRotation().getX();
         double y=transform.getRotation().getY();
         double z=transform.getRotation().getZ();
         double w=transform.getRotation().getW();
     
         rotation_matrix=getR(x,y,z,w);
-        rate.sleep();
         ros::spinOnce();
+        rate.sleep();
+        
     }
     return 0;
 }
